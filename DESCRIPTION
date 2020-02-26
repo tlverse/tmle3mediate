@@ -1,0 +1,42 @@
+Package: tmle3mediate
+Title: Mediation Analysis with Targeted Minimum Loss Estimation
+Version: 0.0.1
+Authors@R:
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+Depends:
+    R (>= 3.4.0)
+Imports:
+    R6,
+    uuid,
+    methods,
+    data.table,
+    assertthat,
+    tmle3
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown,
+    covr,
+    stats,
+    ggplot2,
+    sl3,
+    Rsolnp,
+    nnls,
+    medshift
+Remotes:
+    github::nhejazi/medshift,
+    github::tlverse/origami,
+    github::tlverse/sl3,
+    github::tlverse/tmle3
+URL: https://tlverse.org/tmle3mediate
+BugReports: https://github.com/tlverse/tmle3mediate/issues
+License: GPL-3
+Encoding: UTF-8
+LazyLoad: yes
+LazyData: true
+RoxygenNote: 7.0.2
