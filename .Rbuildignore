@@ -4,6 +4,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.md
+^sandbox
 
 # Automated testing files.
 ^\.travis\.yml$
