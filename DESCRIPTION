@@ -16,7 +16,8 @@ Imports:
     methods,
     data.table,
     assertthat,
-    tmle3
+    tmle3,
+    sl3
 Suggests:
     testthat,
     knitr,
@@ -24,7 +25,6 @@ Suggests:
     covr,
     stats,
     ggplot2,
-    sl3,
     Rsolnp,
     nnls,
     medshift
