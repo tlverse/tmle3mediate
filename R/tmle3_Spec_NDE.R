@@ -1,7 +1,8 @@
-#' Defines a TML Estimator (except for the data)
-#'
+#' Defines a TML Estimator for Outcome under Joint Static Intervention on
+#' Treatment and Mediator
 #'
 #' @importFrom R6 R6Class
+#' @importFrom tmle3 tmle3_Spec define_lf tmle3_Update Targeted_Likelihood
 #'
 #' @export
 #
@@ -11,12 +12,12 @@ tmle3_Spec_NDE <- R6::R6Class(
   class = TRUE,
   inherit = tmle3_Spec,
   public = list(
-    initialize = function(e_learners, phi_learners,
+    initialize = function(e_learners, psi_Z_learners,
                           max_iter = 1e4, step_size = 1e-6,
                           ...) {
       options <- list(
         e_learners = e_learners,
-        phi_learners = phi_learners,
+        psi_Z_learners = psi_Z_learners,
         max_iter = max_iter,
         step_size = step_size,
         ...
@@ -37,7 +38,7 @@ tmle3_Spec_NDE <- R6::R6Class(
     make_initial_likelihood = function(tmle_task, learner_list = NULL) {
       # build likelihood using helper function and return
       likelihood <- stochastic_mediation_likelihood(tmle_task, learner_list)
-      # note that the likelihood build here is the same as in
+      # note that the likelihood built here is the same as in
       # tmle3::point_tx_likelihood()
       return(likelihood)
     },
@@ -48,17 +49,15 @@ tmle3_Spec_NDE <- R6::R6Class(
         tmle3::LF_derived, "E", self$options$e_learners,
         targeted_likelihood, make_e_task
       )
-      lf_phi <- tmle3::define_lf(
-        tmle3::LF_derived, "phi", self$options$phi_learners,
-        targeted_likelihood, make_NDE_phi_task
+      lf_psi_Z <- tmle3::define_lf(
+        tmle3::LF_derived, "psi_Z", self$options$psi_Z_learners,
+        targeted_likelihood, make_NDE_psi_Z_task
       )
       targeted_likelihood$add_factors(lf_e)
-      targeted_likelihood$add_factors(lf_phi)
+      targeted_likelihood$add_factors(lf_psi_Z)
 
-      # compute a tmle3 "by hand"
-      tmle_params <- tmle3::define_param(Param_medshift, targeted_likelihood,
-        shift_param = self$options$delta_shift
-      )
+      # create param
+      tmle_params <- Param_NDE$new(targeted_likelihood)
       tmle_params <- list(tmle_params)
       return(tmle_params)
     },
@@ -77,25 +76,49 @@ tmle3_Spec_NDE <- R6::R6Class(
   private = list()
 )
 
-#' Natural Direct Effect
+################################################################################
+
+#' Outcome under Joint Static Intervention on Treatment and Mediator
 #'
-#' O=(W,A,Z,Y)
-#' W=Covariates
-#' A=Treatment (binary or categorical)
-#' Z=Mediator
-#' Y=Outcome (binary or bounded continuous)
-#' @importFrom sl3 make_learner Lrnr_mean
-#' @param treatment_level the level of A that corresponds to treatment
-#' @param control_level the level of A that corresponds to a control or reference level
+#' O = (W, A, Z, Y)
+#' W = Covariates (possibly multivariate)
+#' A = Treatment (binary or categorical)
+#' Z = Mediators (binary or categorical; possibly multivariate)
+#' Y = Outcome (binary or bounded continuous)
+#'
+#' @param e_learners A \code{Stack} object, or other learner class (inheriting
+#'   from \code{Lrnr_base}), containing a single or set of instantiated learners
+#'   from the \code{sl3} package, to be used in fitting a cleverly parameterized
+#'   propensity score that includes the mediators, i.e., e = P(A | Z, W).
+#' @param psi_Z_learners A \code{Stack} object, or other learner class
+#'   (inheriting from \code{Lrnr_base}), containing a single or set of
+#'   instantiated learners from the \code{sl3} package, to be used in fitting a
+#'   reduced regression useful for computing the psi_Z nuisance parameter, i.e.,
+#'   psi_Z(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W].
+#' @param max_iter A \code{numeric} setting the total number of iterations to be
+#'   used in the targeted procedure based on universal least favorable
+#'   submodels.
+#' @param step_size A \code{numeric} giving the step size (\code{delta_epsilon}
+#'   in \code{tmle3}) to be used in the targeted procedure based on universal
+#'   least favorable submodels.
+#' @param ... Additional arguments (currently unused).
+#'
 #' @export
-tmle_NDE <- function(treatment_level, control_level) {
-  # TODO: unclear why this has to be in a factory function
-  tmle3_Spec_ATE$new(treatment_level, control_level)
+#
+tmle_NDE <- function(e_learners, psi_Z_learners,
+                     max_iter = 1e4, step_size = 1e-6,
+                     ...) {
+  # this is a factory function
+  tmle3_Spec_NDE$new(
+    e_learners, psi_Z_learners,
+    max_iter, step_size,
+    ...
+  )
 }
 
 ################################################################################
 
-#' Make task for derived likelihood factor phi(W) for NDE
+#' Make task for derived likelihood factor psi_Z(W) for NDE
 #'
 #' @param tmle_task A \code{tmle3_Task} object specifying the data and the
 #'  NPSEM for use in constructing elements of TML estimator.
@@ -108,8 +131,9 @@ tmle_NDE <- function(treatment_level, control_level) {
 #'
 #' @keywords internal
 #
-make_NDE_phi_task <- function(tmle_task, likelihood) {
+make_NDE_psi_Z_task <- function(tmle_task, likelihood) {
   # create treatment and control tasks for intervention conditions
+  # TODO: remove node name hard-coding
   treatment_task <-
     tmle_task$generate_counterfactual_task(
       uuid = uuid::UUIDgenerate(),
@@ -127,12 +151,12 @@ make_NDE_phi_task <- function(tmle_task, likelihood) {
   m_diff <- m1 - m0
 
   # create regression task for pseudo-outcome and baseline covariates
-  phi_data <- data.table::as.data.table(list(
+  psi_Z_data <- data.table::as.data.table(list(
     m_diff = m_diff,
     tmle_task$get_tmle_node("W")
   ))
-  phi_task <- sl3::sl3_Task$new(
-    data = phi_data,
+  psi_Z_task <- sl3::sl3_Task$new(
+    data = psi_Z_data,
     outcome = "m_diff",
     covariates = tmle_task$npsem[["W"]]$variables,
     outcome_type = "continuous"
@@ -140,6 +164,6 @@ make_NDE_phi_task <- function(tmle_task, likelihood) {
 
   # subset data: control observations only
   control_row_index <- tmle_task$get_tmle_node("A") == 0
-  
-  return(phi_task$subset_task(control_row_index))
+
+  return(psi_Z_task$subset_task(control_row_index))
 }
