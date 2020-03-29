@@ -49,12 +49,20 @@ tmle3_Spec_NIE <- R6::R6Class(
         tmle3::LF_derived, "E", self$options$e_learners,
         targeted_likelihood, make_e_task
       )
-      lf_psi_Z <- tmle3::define_lf(
-        tmle3::LF_derived, "psi_Z", self$options$psi_Z_learners,
-        targeted_likelihood, make_NDE_psi_Z_task
+      
+      lf_psi_Z0 <- tmle3::define_lf(
+        tmle3::LF_derived, "psi_Z0", self$options$psi_Z_learners,
+        targeted_likelihood, make_NIE_psi_Z0_task
       )
+      
+      lf_psi_Z1 <- tmle3::define_lf(
+        tmle3::LF_derived, "psi_Z1", self$options$psi_Z_learners,
+        targeted_likelihood, make_NIE_psi_Z1_task
+      )
+      
       targeted_likelihood$add_factors(lf_e)
-      targeted_likelihood$add_factors(lf_psi_Z)
+      targeted_likelihood$add_factors(lf_psi_Z0)
+      targeted_likelihood$add_factors(lf_psi_Z1)
       
       # create param
       tmle_params <- Param_NIE$new(targeted_likelihood)
@@ -132,18 +140,13 @@ tmle_NIE <- function(e_learners, psi_Z_learners,
 #'
 #' @keywords internal
 #
-make_NIE_psi_Z_task <- function(tmle_task, likelihood) {
+make_NIE_psi_Z0_task <- function(tmle_task, likelihood) {
   # create treatment and control tasks for intervention conditions
   # TODO: remove node name hard-coding
   treatment_task <-
     tmle_task$generate_counterfactual_task(
       uuid = uuid::UUIDgenerate(),
       new_data = data.table::data.table(A = 1)
-    )
-  control_task <-
-    tmle_task$generate_counterfactual_task(
-      uuid = uuid::UUIDgenerate(),
-      new_data = data.table::data.table(A = 0)
     )
   
   # create counterfactual outcomes and construct pseudo-outcome
@@ -164,7 +167,37 @@ make_NIE_psi_Z_task <- function(tmle_task, likelihood) {
   
   # subset data: control observations only
   control_row_index <- tmle_task$get_tmle_node("A") == 0
+
+  return(psi_Z_task$subset_task(control_row_index))
+}
+
+make_NIE_psi_Z1_task <- function(tmle_task, likelihood) {
+  # create treatment and control tasks for intervention conditions
+  # TODO: remove node name hard-coding
+  treatment_task <-
+    tmle_task$generate_counterfactual_task(
+      uuid = uuid::UUIDgenerate(),
+      new_data = data.table::data.table(A = 1)
+    )
+  
+  # create counterfactual outcomes and construct pseudo-outcome
+  m1 <- likelihood$get_likelihood(treatment_task, "Y")
+  
+  # create regression task for pseudo-outcome and baseline covariates
+  psi_Z_data <- data.table::as.data.table(list(
+    m1 = m1,
+    tmle_task$get_tmle_node("W")
+  ))
+  
+  psi_Z_task <- sl3::sl3_Task$new(
+    data = psi_Z_data,
+    outcome = "m1",
+    covariates = tmle_task$npsem[["W"]]$variables,
+    outcome_type = "continuous"
+  )
+  
+  # subset data: control observations only
   treatment_row_index <- tmle_task$get_tmle_node("A") == 1
   
-  return(c(psi_Z_task$subset_task(control_row_index), psi_Z_task$subset_task(treatment_row_index))
+  return(psi_Z_task$subset_task(treatment_row_index))
 }

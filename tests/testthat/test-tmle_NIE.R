@@ -120,13 +120,8 @@ test_that("TML estimate...", {
 
 ################################################################################
 if (FALSE) {
-  get_sim_truth <- function(n_obs = 1e7, # number of observations
-                              n_w = 3) { # number of baseline covariates
+  get_sim_truth <- function(data) { # number of baseline covariates
     # compute large data set for true values
-    data <- make_simulated_data(
-      n_obs = n_obs,
-      n_w = n_w
-    )
     w_names <- str_subset(colnames(data), "W")
     z_names <- str_subset(colnames(data), "Z")
     W <- data[, ..w_names]
@@ -160,6 +155,19 @@ if (FALSE) {
       n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
       pZ_A0 = n_Z / n_W
     })
+    
+    pZ_A1 <- apply(WZ_vals, MARGIN = 1, function(wz) {
+      w1 <- wz["W_1"]
+      w2 <- wz["W_2"]
+      w3 <- wz["W_3"]
+      z1 <- wz["Z_1"]
+      z2 <- wz["Z_2"]
+      z3 <- wz["Z_3"]
+      W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 1)
+      n_W <- nrow(W_subset)
+      n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
+      pZ_A1 = n_Z / n_W
+    })
 
     # compute p(W)
     pW <- data %>% group_by(W_1, W_2, W_3) %>%
@@ -172,18 +180,23 @@ if (FALSE) {
       EY_A1 = EY_A$A1,
       EY_A0 = EY_A$A0,
       pZ_A0 = pZ_A0,
+      pZ_A1 = pZ_A1,
       pW = WZ_vals$pW
     ))
   }
 
   # simulate data and extract components for computing true parameter value
-  sim_truth <- get_sim_truth()
+  sim_truth <- get_sim_truth(data)
   EY_A1 <- sim_truth$EY_A1
   EY_A0 <- sim_truth$EY_A0
   pZ_A0 <- sim_truth$pZ_A0
+  pZ_A1 <- sim_truth$pZ_A1
+  
   pW <- sim_truth$pW
 
-  # compute true NDE via empirical substitution estimator
-  psi_true <- sum((EY_A1 - EY_A0)*pZ_A0*pW)
-  psi_true
+  # compute true NIE via empirical substitution estimator
+  ATE <- mean(EY_A1 - EY_A0)
+  psi_NDE_true <- sum((EY_A1 - EY_A0)*pZ_A0*pW)
+  psi_NIE_true <- sum((EY_A1)*(pZ_A1-pZ_A0))
+  
 }
