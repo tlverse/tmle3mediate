@@ -126,7 +126,7 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   z_names <- str_subset(colnames(data), "Z")
   W <- data[, ..w_names]
   Z <- data[, ..z_names]
-  
+
   # Z_1 counterfactuals
   z1_prob_1 <- 1 - plogis((1 + W$W_1) / (1 + W$W_1^3 + 0.5))
   z1_prob_0 <- 1 - plogis((0 + W$W_1) / (0 + W$W_1^3 + 0.5))
@@ -145,21 +145,25 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   Z_3_1 <- rbinom(n_obs, 1, prob = z3_prob_1)
   Z_3_0 <- rbinom(n_obs, 1, prob = z3_prob_0)
 
+  # compute counterfactuals Y(1) and Y(0)
+  Y1 <- Z_1_1 + Z_2_1 - Z_3_1 +
+    exp(1 + Z_3_1 / (1 + rowSums(W)^2))
+  Y0 <- Z_1_0 + Z_2_0 - Z_3_0 +
+    exp(0 + Z_3_0 / (1 + rowSums(W)^2))
+
   # compute TRUE M under counterfactual regimes
-  m_Ais1 <- Z$Z_1 + Z$Z_2 - Z$Z_3 +
-    exp(1 + Z$Z_3 / (1 + rowSums(W)^2))
-  m_Ais0 <- Z$Z_1 + Z$Z_2 - Z$Z_3 +
-    exp(0 + Z$Z_3 / (1 + rowSums(W)^2))
-  
-  # compute E(Y | A = a, w, z) for A = 0,1 and all levels of (w,z)
-  EY_A <- data %>%
+  m_Ais1 <- Z$Z_1 + Z$Z_2 - Z$Z_3 + exp(1 + Z$Z_3 / (1 + rowSums(W)^2))
+  m_Ais0 <- Z$Z_1 + Z$Z_2 - Z$Z_3 + exp(0 + Z$Z_3 / (1 + rowSums(W)^2))
+
+  # compute E(Y | A = a, W, Z) for A = 0,1 and all levels of (W,Z)
+  EYa_ZW <- data %>%
     mutate(
       m_Ais1 = m_Ais1,
       m_Ais0 = m_Ais0
     ) %>%
     group_by(W_1, W_2, W_3, Z_1, Z_2, Z_3) %>%
     summarize(A1 = mean(m_Ais1), A0 = mean(m_Ais0))
-  
+
   # compute p(z | A = 0, w)
   WZ_vals <- expand.grid(
     W_1 = c(0,1), W_2 = c(0,1), W_3 = c(0,1),
@@ -177,7 +181,7 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
     n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
     pZ_A0 = n_Z / n_W
   })
-  
+
   pZ_A1 <- apply(WZ_vals, MARGIN = 1, function(wz) {
     w1 <- wz["W_1"]
     w2 <- wz["W_2"]
@@ -190,17 +194,19 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
     n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
     pZ_A0 = n_Z / n_W
   })
-  
+
   # compute p(W)
   pW <- data %>% group_by(W_1, W_2, W_3) %>%
     summarize(pW = n() / n_obs)
-  
+
   WZ_vals <- WZ_vals %>% left_join(pW)
-  
+
   # output: true values of nuisance parameters
   return(list(
-    EY_A1 = EY_A$A1,
-    EY_A0 = EY_A$A0,
+    Y1 = Y1,
+    Y0 = Y0,
+    EY1_ZW = EYa_ZW$A1,
+    EY0_ZW = EYa_ZW$A0,
     pZ_A0 = pZ_A0,
     pZ_A1 = pZ_A1,
     pW = WZ_vals$pW
@@ -209,15 +215,17 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
 
 # simulate data and extract components for computing true parameter value
 sim_truth_NIE <- get_sim_truth_NIE()
-EY_A1 <- sim_truth_NIE$EY_A1
-EY_A0 <- sim_truth_NIE$EY_A0
+
+Y1 <- sim_truth_NIE$Y1
+Y0 <- sim_truth_NIE$Y0
+EY1_ZW <- sim_truth_NIE$EY1_ZW
+EY0_ZW <- sim_truth_NIE$EY0_ZW
 pZ_A0 <- sim_truth_NIE$pZ_A0
 pZ_A1 <- sim_truth_NIE$pZ_A1
 
 pW <- sim_truth_NIE$pW
 
-
 # compute true NIE via empirical substitution estimator
-ATE <- mean(EY_A1 - EY_A0)
-psi_NDE_true <- sum((EY_A1 - EY_A0)*pZ_A0*pW)
-psi_NIE_true <- sum((EY_A1)*(pZ_A1-pZ_A0)*pW)
+ATE <- mean(Y1 - Y0)
+psi_NDE_true <- sum((EY1_ZW - EY0_ZW)*pZ_A0*pW)
+psi_NIE_true <- sum(sum((EY1_ZW)*(pZ_A1 - pZ_A0))*pW)

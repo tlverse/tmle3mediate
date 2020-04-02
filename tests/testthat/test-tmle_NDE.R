@@ -158,7 +158,7 @@ if (TRUE) {
       exp(0 + Z_3_0 / (1 + rowSums(W)^2))
 
     # compute E(Y | A = a, w, z) for A = 0,1 and all levels of (w,z)
-    EY_A <- data %>%
+    EYa_ZW <- data %>%
       mutate(
         m_Ais1 = m_Ais1,
         m_Ais0 = m_Ais0
@@ -192,8 +192,10 @@ if (TRUE) {
 
     # output: true values of nuisance parameters
     return(list(
-      EY_A1 = EY_A$A1,
-      EY_A0 = EY_A$A0,
+      Y1 = Y1,
+      Y0 = Y0,
+      EY1_ZW = EY_A$A1,
+      EY0_ZW = EY_A$A0,
       pZ_A0 = pZ_A0,
       pW = WZ_vals$pW
     ))
@@ -201,12 +203,16 @@ if (TRUE) {
 
   # simulate data and extract components for computing true parameter value
   sim_truth <- get_sim_truth()
-  EY_A1 <- sim_truth$EY_A1
-  EY_A0 <- sim_truth$EY_A0
+  Y1 <- sim_truth$Y1
+  Y0 <- sim_truth$Y0
+  EY1_ZW <- sim_truth$EY1_ZW
+  EY0_ZW <- sim_truth$EY0_ZW
   pZ_A0 <- sim_truth$pZ_A0
   pW <- sim_truth$pW
 
+  ATE <- mean(Y1 - Y0)
+
   # compute true NDE via empirical substitution estimator
-  psi_true <- sum((EY_A1 - EY_A0)*pZ_A0*pW)
+  psi_true <- sum((EY1_ZW - EY0_ZW)*pZ_A0*pW)
   psi_true
 }
