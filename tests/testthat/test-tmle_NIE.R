@@ -31,7 +31,6 @@ cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 ################################################################################
 make_simulated_data <- function(n_obs = 1000, # no. observations
                                 n_w = 3) { # no. baseline covariates
-
   # baseline covariate -- simple, binary
   W_1 <- rbinom(n_obs, 1, prob = 0.50)
   W_2 <- rbinom(n_obs, 1, prob = 0.65)
@@ -128,6 +127,24 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   W <- data[, ..w_names]
   Z <- data[, ..z_names]
   
+  # Z_1 counterfactuals
+  z1_prob_1 <- 1 - plogis((1 + W$W_1) / (1 + W$W_1^3 + 0.5))
+  z1_prob_0 <- 1 - plogis((0 + W$W_1) / (0 + W$W_1^3 + 0.5))
+  Z_1_1 <- rbinom(n_obs, 1, prob = z1_prob_1)
+  Z_1_0 <- rbinom(n_obs, 1, prob = z1_prob_0)
+
+  # Z_2 counterfactuals
+  z2_prob_1 <- plogis((1 - 1)^3 + W$W_2 / (W$W_3 + 3))
+  z2_prob_0 <- plogis((0 - 1)^3 + W$W_2 / (W$W_3 + 3))
+  Z_2_1 <- rbinom(n_obs, 1, prob = z2_prob_1)
+  Z_2_0 <- rbinom(n_obs, 1, prob = z2_prob_0)
+
+  ## Z_3 counterfactuals
+  z3_prob_1 <- plogis((1 - 1)^2 + 2 * W$W_1^3 - 1 / (2 * W$W_1 + 0.5))
+  z3_prob_0 <- plogis((0 - 1)^2 + 2 * W$W_1^3 - 1 / (2 * W$W_1 + 0.5))
+  Z_3_1 <- rbinom(n_obs, 1, prob = z3_prob_1)
+  Z_3_0 <- rbinom(n_obs, 1, prob = z3_prob_0)
+
   # compute TRUE M under counterfactual regimes
   m_Ais1 <- Z$Z_1 + Z$Z_2 - Z$Z_3 +
     exp(1 + Z$Z_3 / (1 + rowSums(W)^2))
@@ -136,6 +153,10 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   
   # compute E(Y | A = a, w, z) for A = 0,1 and all levels of (w,z)
   EY_A <- data %>%
+    mutate(
+      m_Ais1 = m_Ais1,
+      m_Ais0 = m_Ais0
+    ) %>%
     group_by(W_1, W_2, W_3, Z_1, Z_2, Z_3) %>%
     summarize(A1 = mean(m_Ais1), A0 = mean(m_Ais0))
   
@@ -188,15 +209,15 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
 
 # simulate data and extract components for computing true parameter value
 sim_truth_NIE <- get_sim_truth_NIE()
-EY_A1 <- sim_truth$EY_A1
-EY_A0 <- sim_truth$EY_A0
-pZ_A0 <- sim_truth$pZ_A0
-pZ_A1 <- sim_truth$pZ_A1
+EY_A1 <- sim_truth_NIE$EY_A1
+EY_A0 <- sim_truth_NIE$EY_A0
+pZ_A0 <- sim_truth_NIE$pZ_A0
+pZ_A1 <- sim_truth_NIE$pZ_A1
 
-pW <- sim_truth$pW
+pW <- sim_truth_NIE$pW
 
 
 # compute true NIE via empirical substitution estimator
 ATE <- mean(EY_A1 - EY_A0)
 psi_NDE_true <- sum((EY_A1 - EY_A0)*pZ_A0*pW)
-psi_NIE_true <- sum((EY_A1)*(pZ_A1-pZ_A0))
+psi_NIE_true <- sum((EY_A1)*(pZ_A1-pZ_A0)*pW)

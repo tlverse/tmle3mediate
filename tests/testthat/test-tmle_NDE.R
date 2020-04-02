@@ -115,11 +115,11 @@ tmle_fit <- tmle3(tmle_spec, data, node_list, learner_list)
 tmle_fit
 
 # test --- what exactly?
-test_that("TML estimate...", {
-})
+# test_that("TML estimate...", {
+# })
 
 ################################################################################
-if (FALSE) {
+if (TRUE) {
   get_sim_truth <- function(n_obs = 1e7, # number of observations
                               n_w = 3) { # number of baseline covariates
     # compute large data set for true values
@@ -127,19 +127,42 @@ if (FALSE) {
       n_obs = n_obs,
       n_w = n_w
     )
+
     w_names <- str_subset(colnames(data), "W")
     z_names <- str_subset(colnames(data), "Z")
     W <- data[, ..w_names]
     Z <- data[, ..z_names]
 
+    # Z_1 counterfactuals
+    z1_prob_1 <- 1 - plogis((1 + W$W_1) / (1 + W$W_1^3 + 0.5))
+    z1_prob_0 <- 1 - plogis((0 + W$W_1) / (0 + W$W_1^3 + 0.5))
+    Z_1_1 <- rbinom(n_obs, 1, prob = z1_prob_1)
+    Z_1_0 <- rbinom(n_obs, 1, prob = z1_prob_0)
+
+    # Z_2 counterfactuals
+    z2_prob_1 <- plogis((1 - 1)^3 + W$W_2 / (W$W_3 + 3))
+    z2_prob_0 <- plogis((0 - 1)^3 + W$W_2 / (W$W_3 + 3))
+    Z_2_1 <- rbinom(n_obs, 1, prob = z2_prob_1)
+    Z_2_0 <- rbinom(n_obs, 1, prob = z2_prob_0)
+
+    ## Z_3 counterfactuals
+    z3_prob_1 <- plogis((1 - 1)^2 + 2 * W$W_1^3 - 1 / (2 * W$W_1 + 0.5))
+    z3_prob_0 <- plogis((0 - 1)^2 + 2 * W$W_1^3 - 1 / (2 * W$W_1 + 0.5))
+    Z_3_1 <- rbinom(n_obs, 1, prob = z3_prob_1)
+    Z_3_0 <- rbinom(n_obs, 1, prob = z3_prob_0)
+
     # compute TRUE M under counterfactual regimes
-    m_Ais1 <- Z$Z_1 + Z$Z_2 - Z$Z_3 +
-      exp(1 + Z$Z_3 / (1 + rowSums(W)^2))
-    m_Ais0 <- Z$Z_1 + Z$Z_2 - Z$Z_3 +
-      exp(0 + Z$Z_3 / (1 + rowSums(W)^2))
+    m_Ais1 <- Z_1_1 + Z_2_1 - Z_3_1 +
+      exp(1 + Z_3_1 / (1 + rowSums(W)^2))
+    m_Ais0 <- Z_1_0 + Z_2_0 - Z_3_0 +
+      exp(0 + Z_3_0 / (1 + rowSums(W)^2))
 
     # compute E(Y | A = a, w, z) for A = 0,1 and all levels of (w,z)
     EY_A <- data %>%
+      mutate(
+        m_Ais1 = m_Ais1,
+        m_Ais0 = m_Ais0
+      ) %>%
       group_by(W_1, W_2, W_3, Z_1, Z_2, Z_3) %>%
       summarize(A1 = mean(m_Ais1), A0 = mean(m_Ais0))
 
