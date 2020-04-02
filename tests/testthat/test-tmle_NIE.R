@@ -29,7 +29,7 @@ cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 ################################################################################
 # setup data and simulate to test with estimators
 ################################################################################
-make_simulated_data <- function(n_obs = 1000, # no. observations
+make_simulated_data <- function(n_obs = 5000, # no. observations
                                 n_w = 3) { # no. baseline covariates
   # baseline covariate -- simple, binary
   W_1 <- rbinom(n_obs, 1, prob = 0.50)
@@ -105,7 +105,7 @@ tmle_params <- tmle_spec$make_params(tmle_task, likelihood_targeted)
 updater$tmle_params <- tmle_params
 
 ## fit tmle update
-tmle_fit <- fit_tmle3(tmle_task, likelihood_targeted, tmle_params, updater)
+tmle_fit_NIE <- fit_tmle3(tmle_task, likelihood_targeted, tmle_params, updater)
 
 
 ## one-line call with faster with tmle3 wrapper
@@ -115,7 +115,7 @@ tmle_fit
 
 
 ################################################################################
-get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
+get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
                           n_w = 3) { # number of baseline covariates
   # compute large data set for true values
   data <- make_simulated_data(
@@ -146,10 +146,17 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   Z_3_0 <- rbinom(n_obs, 1, prob = z3_prob_0)
 
   # compute counterfactuals Y(1) and Y(0)
-  Y1 <- Z_1_1 + Z_2_1 - Z_3_1 +
+  EY_A1_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
     exp(1 + Z_3_1 / (1 + rowSums(W)^2))
-  Y0 <- Z_1_0 + Z_2_0 - Z_3_0 +
+  
+  EY_A0_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
     exp(0 + Z_3_0 / (1 + rowSums(W)^2))
+  
+  EY_A1_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
+    exp(1 + Z_3_0 / (1 + rowSums(W)^2))
+  
+  EY_A0_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
+    exp(0 + Z_3_1 / (1 + rowSums(W)^2))
 
   # compute TRUE M under counterfactual regimes
   m_Ais1 <- Z$Z_1 + Z$Z_2 - Z$Z_3 + exp(1 + Z$Z_3 / (1 + rowSums(W)^2))
@@ -203,8 +210,10 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
 
   # output: true values of nuisance parameters
   return(list(
-    Y1 = Y1,
-    Y0 = Y0,
+    EY_A1_Z1 = EY_A1_Z1,
+    EY_A1_Z0 = EY_A1_Z0, 
+    EY_A0_Z1 = EY_A0_Z1, 
+    EY_A0_Z0 = EY_A0_Z0,
     EY1_ZW = EYa_ZW$A1,
     EY0_ZW = EYa_ZW$A0,
     pZ_A0 = pZ_A0,
@@ -216,16 +225,23 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
 # simulate data and extract components for computing true parameter value
 sim_truth_NIE <- get_sim_truth_NIE()
 
-Y1 <- sim_truth_NIE$Y1
-Y0 <- sim_truth_NIE$Y0
+EY_A1_Z1 <- sim_truth_NIE$EY_A1_Z1
+EY_A1_Z0 <- sim_truth_NIE$EY_A1_Z0
+EY_A0_Z1 <- sim_truth_NIE$EY_A0_Z1
+EY_A0_Z0 <- sim_truth_NIE$EY_A0_Z0
+
 EY1_ZW <- sim_truth_NIE$EY1_ZW
 EY0_ZW <- sim_truth_NIE$EY0_ZW
 pZ_A0 <- sim_truth_NIE$pZ_A0
 pZ_A1 <- sim_truth_NIE$pZ_A1
-
 pW <- sim_truth_NIE$pW
 
 # compute true NIE via empirical substitution estimator
-ATE <- mean(Y1 - Y0)
-psi_NDE_true <- sum((EY1_ZW - EY0_ZW)*pZ_A0*pW)
-psi_NIE_true <- sum(sum((EY1_ZW)*(pZ_A1 - pZ_A0))*pW)
+psi_NDE_true <- mean(EY_A1_Z0 - EY_A0_Z0)
+psi_NDE_true
+psi_NIE_true <- mean(EY_A1_Z1 - EY_A1_Z0)
+psi_NIE_true
+ATE <- psi_NDE_true + psi_NIE_true
+ATE
+ATE_2 <- mean(EY1_ZW - EY0_ZW)
+ATE_2
