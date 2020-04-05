@@ -46,6 +46,7 @@ Parameter definition class. See https://www.ncbi.nlm.nih.gov/pubmed/22499725
 
 \seealso{
 Other Parameters: 
+\code{\link{Param_NIE}},
 \code{\link{Param_medshift}}
 }
 \concept{Parameters}

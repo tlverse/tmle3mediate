@@ -2,11 +2,14 @@
 % Please edit documentation in R/tmle3_Spec_NIE.R
 \name{tmle3_Spec_NIE}
 \alias{tmle3_Spec_NIE}
-\title{Defines a TML Estimator (except for the data)}
+\title{Defines a TML Estimator for Outcome under Joint Static Intervention on
+Treatment and Mediator}
 \description{
-Defines a TML Estimator (except for the data)
+Defines a TML Estimator for Outcome under Joint Static Intervention on
+Treatment and Mediator
 
-Defines a TML Estimator (except for the data)
+Defines a TML Estimator for Outcome under Joint Static Intervention on
+Treatment and Mediator
 }
 \section{Super class}{
 \code{\link[tmle3:tmle3_Spec]{tmle3::tmle3_Spec}} -> \code{tmle3_Spec_NIE}
@@ -35,7 +38,7 @@ Defines a TML Estimator (except for the data)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{tmle3_Spec_NIE$new(
   e_learners,
-  phi_learners,
+  psi_Z_learners,
   max_iter = 10000,
   step_size = 1e-06,
   ...
