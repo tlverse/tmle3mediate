@@ -1,4 +1,4 @@
-context("TML estimator for incremental propensity score interventions")
+context("TML estimator for natural indirect effect")
 
 library(data.table)
 library(stringr)
@@ -8,9 +8,9 @@ library(sl3)
 library(tmle3)
 set.seed(7128816)
 
-################################################################################
+###############################################################################
 # setup learners for the nuisance parameters
-################################################################################
+###############################################################################
 
 # instantiate some learners
 mean_lrnr <- Lrnr_mean$new()
@@ -26,9 +26,9 @@ hal_binary_lrnr <- Lrnr_hal9001$new(
 cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
 cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 
-################################################################################
+###############################################################################
 # setup data and simulate to test with estimators
-################################################################################
+###############################################################################
 make_simulated_data <- function(n_obs = 5000, # no. observations
                                 n_w = 3) { # no. baseline covariates
   # baseline covariate -- simple, binary
@@ -113,10 +113,9 @@ set.seed(71281)
 tmle_fit <- tmle3(tmle_spec, data, node_list, learner_list)
 tmle_fit
 
-
-################################################################################
-get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
-                          n_w = 3) { # number of baseline covariates
+###############################################################################
+get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
+                              n_w = 3) { # number of baseline covariates
   # compute large data set for true values
   data <- make_simulated_data(
     n_obs = n_obs,
@@ -148,13 +147,13 @@ get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
   # compute counterfactuals Y(1) and Y(0)
   EY_A1_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
     exp(1 + Z_3_1 / (1 + rowSums(W)^2))
-  
+
   EY_A0_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
     exp(0 + Z_3_0 / (1 + rowSums(W)^2))
-  
+
   EY_A1_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
     exp(1 + Z_3_0 / (1 + rowSums(W)^2))
-  
+
   EY_A0_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
     exp(0 + Z_3_1 / (1 + rowSums(W)^2))
 
@@ -183,9 +182,10 @@ get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
     z1 <- wz["Z_1"]
     z2 <- wz["Z_2"]
     z3 <- wz["Z_3"]
-    W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 0)
+    W_subset <- data %>% dplyr::filter(W_1 == w1, W_2 == w2,
+                                       W_3 == w3, A == 0)
     n_W <- nrow(W_subset)
-    n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
+    n_Z <- nrow(W_subset %>% dplyr::filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
     pZ_A0 = n_Z / n_W
   })
 
@@ -196,14 +196,16 @@ get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
     z1 <- wz["Z_1"]
     z2 <- wz["Z_2"]
     z3 <- wz["Z_3"]
-    W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 1)
+    W_subset <- data %>% dplyr::filter(W_1 == w1, W_2 == w2,
+                                       W_3 == w3, A == 1)
     n_W <- nrow(W_subset)
-    n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
+    n_Z <- nrow(W_subset %>% dplyr::filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
     pZ_A0 = n_Z / n_W
   })
 
   # compute p(W)
-  pW <- data %>% group_by(W_1, W_2, W_3) %>%
+  pW <- data %>%
+    group_by(W_1, W_2, W_3) %>%
     summarize(pW = n() / n_obs)
 
   WZ_vals <- WZ_vals %>% left_join(pW)
@@ -212,7 +214,7 @@ get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
   return(list(
     EY_A1_Z1 = EY_A1_Z1,
     EY_A1_Z0 = EY_A1_Z0, 
-    EY_A0_Z1 = EY_A0_Z1, 
+    EY_A0_Z1 = EY_A0_Z1,
     EY_A0_Z0 = EY_A0_Z0,
     EY1_ZW = EYa_ZW$A1,
     EY0_ZW = EYa_ZW$A0,
@@ -223,7 +225,7 @@ get_sim_truth_NIE <- function(n_obs = 5000, # number of observations
 }
 
 # simulate data and extract components for computing true parameter value
-sim_truth_NIE <- get_sim_truth_NIE()
+sim_truth_NIE <- get_sim_truth_NIE(n_obs = 1e6)
 
 EY_A1_Z1 <- sim_truth_NIE$EY_A1_Z1
 EY_A1_Z0 <- sim_truth_NIE$EY_A1_Z0

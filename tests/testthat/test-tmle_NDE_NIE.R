@@ -1,4 +1,4 @@
-context("TML estimator for incremental propensity score interventions")
+context("TML estimator for natural (in)direct effects")
 
 library(data.table)
 library(stringr)

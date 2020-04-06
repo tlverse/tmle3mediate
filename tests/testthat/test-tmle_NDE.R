@@ -1,4 +1,4 @@
-context("TML estimator for incremental propensity score interventions")
+context("TML estimator for natural direct effect")
 
 library(data.table)
 library(stringr)
@@ -121,13 +121,12 @@ tmle_fit
 ################################################################################
 if (TRUE) {
   get_sim_truth <- function(n_obs = 1e7, # number of observations
-                              n_w = 3) { # number of baseline covariates
+                            n_w = 3) { # number of baseline covariates
     # compute large data set for true values
     data <- make_simulated_data(
       n_obs = n_obs,
       n_w = n_w
     )
-
     w_names <- str_subset(colnames(data), "W")
     z_names <- str_subset(colnames(data), "Z")
     W <- data[, ..w_names]
@@ -164,12 +163,13 @@ if (TRUE) {
         m_Ais0 = m_Ais0
       ) %>%
       group_by(W_1, W_2, W_3, Z_1, Z_2, Z_3) %>%
-      summarize(A1 = mean(m_Ais1), A0 = mean(m_Ais0))
+      summarize(A1 = mean(m_Ais1),
+                A0 = mean(m_Ais0))
 
     # compute p(z | A = 0, w)
     WZ_vals <- expand.grid(
-      W_1 = c(0,1), W_2 = c(0,1), W_3 = c(0,1),
-      Z_1 = c(0,1), Z_2 = c(0,1), Z_3 = c(0,1)
+      W_1 = c(0, 1), W_2 = c(0, 1), W_3 = c(0, 1),
+      Z_1 = c(0, 1), Z_2 = c(0, 1), Z_3 = c(0, 1)
     )
     pZ_A0 <- apply(WZ_vals, MARGIN = 1, function(wz) {
       w1 <- wz["W_1"]
@@ -178,41 +178,41 @@ if (TRUE) {
       z1 <- wz["Z_1"]
       z2 <- wz["Z_2"]
       z3 <- wz["Z_3"]
-      W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 0)
+      W_subset <- data %>% dplyr::filter(W_1 == w1, W_2 == w2,
+                                         W_3 == w3, A == 0)
       n_W <- nrow(W_subset)
-      n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
+      n_Z <- nrow(W_subset %>% dplyr::filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
       pZ_A0 = n_Z / n_W
     })
 
     # compute p(W)
-    pW <- data %>% group_by(W_1, W_2, W_3) %>%
+    pW <- data %>%
+      group_by(W_1, W_2, W_3) %>%
       summarize(pW = n() / n_obs)
-
     WZ_vals <- WZ_vals %>% left_join(pW)
 
     # output: true values of nuisance parameters
     return(list(
-      Y1 = Y1,
-      Y0 = Y0,
-      EY1_ZW = EY_A$A1,
-      EY0_ZW = EY_A$A0,
+      Y1 = m_Ais1,
+      Y0 = m_Ais0,
+      EY1_ZW = EYa_ZW$A1,
+      EY0_ZW = EYa_ZW$A0,
       pZ_A0 = pZ_A0,
       pW = WZ_vals$pW
     ))
   }
 
   # simulate data and extract components for computing true parameter value
-  sim_truth <- get_sim_truth()
+  sim_truth <- get_sim_truth(n_obs = 1e6)
   Y1 <- sim_truth$Y1
   Y0 <- sim_truth$Y0
   EY1_ZW <- sim_truth$EY1_ZW
   EY0_ZW <- sim_truth$EY0_ZW
   pZ_A0 <- sim_truth$pZ_A0
   pW <- sim_truth$pW
-
   ATE <- mean(Y1 - Y0)
 
   # compute true NDE via empirical substitution estimator
-  psi_true <- sum((EY1_ZW - EY0_ZW)*pZ_A0*pW)
+  psi_true <- sum((EY1_ZW - EY0_ZW) * pZ_A0 * pW)
   psi_true
 }
