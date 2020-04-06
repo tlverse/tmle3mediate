@@ -117,7 +117,7 @@ Param_NDE <- R6::R6Class(
       HZ <- cf_pA_control / g0_est
 
       # output clever covariates
-      return(list(Y = HY, Z = HZ))
+      return(list(Y = HY, psi_Z = HZ))
     },
     estimates = function(tmle_task = NULL, fold_number = "full") {
       if (is.null(tmle_task)) {
@@ -161,7 +161,7 @@ Param_NDE <- R6::R6Class(
       HZ <- self$clever_covariates(
         tmle_task,
         fold_number
-      )[["Z"]]
+      )[["psi_Z"]]
 
       # compute individual scores for DY, DA, DZW
       D_Y <- HY * (y - m_est)

@@ -87,76 +87,77 @@ learner_list <- list(
 ################################################################################
 
 ## instantiate tmle3 spec for NIE
-tmle_spec <- tmle_NIE(
+tmle_spec_NIE <- tmle_NIE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
   max_iter = 100 # TODO: use default when convergence bug fixed
 )
 
 ## define data (from tmle3_Spec base class)
-tmle_task <- tmle_spec$make_tmle_task(data, node_list)
+tmle_task_NIE <- tmle_spec_NIE$make_tmle_task_NIE(data, node_list)
 
 ## define likelihood (from tmle3_Spec base class)
-likelihood_init <- tmle_spec$make_initial_likelihood(tmle_task, learner_list)
+likelihood_init_NIE <- tmle_spec_NIE$make_initial_likelihood(tmle_task_NIE, learner_list)
 
 ## define update method (submodel and loss function)
-updater <- tmle_spec$make_updater()
-likelihood_targeted <- Targeted_Likelihood$new(likelihood_init, updater)
+updater_NIE <- tmle_spec_NIE$make_updater_NIE()
+likelihood_targeted_NIE <- Targeted_Likelihood$new(likelihood_init_NIE, updater_NIE)
 
 ## define param
-tmle_params <- tmle_spec$make_params(tmle_task, likelihood_targeted)
-updater$tmle_params <- tmle_params
+tmle_params_NIE <- tmle_spec_NIE$make_params(tmle_task_NIE, likelihood_targeted_NIE)
+updater_NIE$tmle_params_NIE <- tmle_params_NIE
 
 ## fit tmle update
-tmle_fit_NIE <- fit_tmle3(tmle_task, likelihood_targeted, tmle_params, updater)
+tmle_fit_NIE <- fit_tmle3(tmle_task_NIE, likelihood_targeted_NIE, tmle_params_NIE, updater_NIE)
 tmle_fit_NIE
 
 ## one-line call with faster with tmle3 wrapper
 set.seed(71281)
-tmle_fit_NIE <- tmle3(tmle_spec, data, node_list, learner_list)
+tmle_fit_NIE <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
 tmle_fit_NIE
 
 ################################################################################
 
 ## instantiate tmle3 spec for NDE
-tmle_spec <- tmle_NDE(
+tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
   max_iter = 100 # TODO: use default when convergence bug fixed
 )
 
 ## define data (from tmle3_Spec base class)
-tmle_task <- tmle_spec$make_tmle_task(data, node_list)
+tmle_task_NDE <- tmle_spec_NDE$make_tmle_task_NDE(data, node_list)
 
 ## define likelihood (from tmle3_Spec base class)
-likelihood_init <- tmle_spec$make_initial_likelihood(tmle_task, learner_list)
+likelihood_init_NDE <- tmle_spec_NDE$make_initial_likelihood(tmle_task_NDE, learner_list)
 
 ## define update method (submodel and loss function)
-updater <- tmle_spec$make_updater()
-likelihood_targeted <- Targeted_Likelihood$new(likelihood_init, updater)
+updater_NDE <- tmle_spec_NDE$make_updater_NDE()
+likelihood_targeted_NDE <- Targeted_Likelihood$new(likelihood_init_NDE, updater_NDE)
 
 ## define param
-tmle_params <- tmle_spec$make_params(tmle_task, likelihood_targeted)
-updater$tmle_params <- tmle_params
+tmle_params_NDE <- tmle_spec_NDE$make_params(tmle_task_NDE, likelihood_targeted_NDE)
+updater_NDE$tmle_params_NDE <- tmle_params_NDE
 
 ## fit tmle update
-tmle_fit_NDE <- fit_tmle3(tmle_task, likelihood_targeted, tmle_params, updater)
+tmle_fit_NDE <- fit_tmle3(tmle_task_NDE, likelihood_targeted_NDE, tmle_params_NDE, updater_NDE)
 
 ## one-line call with faster with tmle3 wrapper
 set.seed(71281)
-tmle_fit_NDE <- tmle3(tmle_spec, data, node_list, learner_list)
+tmle_fit_NDE <- tmle3(tmle_spec_NDE, data, node_list, learner_list)
 tmle_fit_NDE
 
 ################################################################################
 ## instantiate tmle3 spec for ATE
-## HERE DO WE NEED TO MAKE A NEW SPEC FOR THE ATE IF Z NEEDS TO BE CONTROLLED FOR AS A COVARIATE WHEN EST Y?
-tmle_spec <- tmle3::tmle3_Spec_ATE
+tmle_spec_ATE <- tmle3::tmle_ATE(1, 0)
 
-
+set.seed(71281)
+tmle_fit_ATE <- tmle3(tmle_spec_ATE, data, node_list, learner_list)
+tmle_fit_ATE
 
 ################################################################################
-get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
-                          n_w = 3) { # number of baseline covariates
+get_sim_truth_NIE_NDE <- function(n_obs = 1e7, # number of observations
+                                  n_w = 3) { # number of baseline covariates
   # compute large data set for true values
   data <- make_simulated_data(
     n_obs = n_obs,
@@ -188,13 +189,13 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
   # compute counterfactuals Y(1) and Y(0)
   EY_A1_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
     exp(1 + Z_3_1 / (1 + rowSums(W)^2))
-  
+
   EY_A0_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
     exp(0 + Z_3_0 / (1 + rowSums(W)^2))
-  
+
   EY_A1_Z0 <- Z_1_0 + Z_2_0 - Z_3_0 +
     exp(1 + Z_3_0 / (1 + rowSums(W)^2))
-  
+
   EY_A0_Z1 <- Z_1_1 + Z_2_1 - Z_3_1 +
     exp(0 + Z_3_1 / (1 + rowSums(W)^2))
 
@@ -211,70 +212,27 @@ get_sim_truth_NIE <- function(n_obs = 1e7, # number of observations
     group_by(W_1, W_2, W_3, Z_1, Z_2, Z_3) %>%
     summarize(A1 = mean(m_Ais1), A0 = mean(m_Ais0))
 
-  # compute p(z | A = 0, w)
-  WZ_vals <- expand.grid(
-    W_1 = c(0,1), W_2 = c(0,1), W_3 = c(0,1),
-    Z_1 = c(0,1), Z_2 = c(0,1), Z_3 = c(0,1)
-  )
-  pZ_A0 <- apply(WZ_vals, MARGIN = 1, function(wz) {
-    w1 <- wz["W_1"]
-    w2 <- wz["W_2"]
-    w3 <- wz["W_3"]
-    z1 <- wz["Z_1"]
-    z2 <- wz["Z_2"]
-    z3 <- wz["Z_3"]
-    W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 0)
-    n_W <- nrow(W_subset)
-    n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
-    pZ_A0 = n_Z / n_W
-  })
-
-  pZ_A1 <- apply(WZ_vals, MARGIN = 1, function(wz) {
-    w1 <- wz["W_1"]
-    w2 <- wz["W_2"]
-    w3 <- wz["W_3"]
-    z1 <- wz["Z_1"]
-    z2 <- wz["Z_2"]
-    z3 <- wz["Z_3"]
-    W_subset <- data %>% filter(W_1 == w1, W_2 == w2, W_3 == w3, A == 1)
-    n_W <- nrow(W_subset)
-    n_Z <- nrow(W_subset %>% filter(Z_1 == z1, Z_2 == z2, Z_3 == z3))
-    pZ_A0 = n_Z / n_W
-  })
-
-  # compute p(W)
-  pW <- data %>% group_by(W_1, W_2, W_3) %>%
-    summarize(pW = n() / n_obs)
-
-  WZ_vals <- WZ_vals %>% left_join(pW)
-
   # output: true values of nuisance parameters
   return(list(
     EY_A1_Z1 = EY_A1_Z1,
-    EY_A1_Z0 = EY_A1_Z0, 
-    EY_A0_Z1 = EY_A0_Z1, 
+    EY_A1_Z0 = EY_A1_Z0,
+    EY_A0_Z1 = EY_A0_Z1,
     EY_A0_Z0 = EY_A0_Z0,
     EY1_ZW = EYa_ZW$A1,
-    EY0_ZW = EYa_ZW$A0,
-    pZ_A0 = pZ_A0,
-    pZ_A1 = pZ_A1,
-    pW = WZ_vals$pW
+    EY0_ZW = EYa_ZW$A0
   ))
 }
 
 # simulate data and extract components for computing true parameter value
-sim_truth_NIE <- get_sim_truth_NIE()
+sim_truth <- get_sim_truth_NIE_NDE()
 
-EY_A1_Z1 <- sim_truth_NIE$EY_A1_Z1
-EY_A1_Z0 <- sim_truth_NIE$EY_A1_Z0
-EY_A0_Z1 <- sim_truth_NIE$EY_A0_Z1
-EY_A0_Z0 <- sim_truth_NIE$EY_A0_Z0
+EY_A1_Z1 <- sim_truth$EY_A1_Z1
+EY_A1_Z0 <- sim_truth$EY_A1_Z0
+EY_A0_Z1 <- sim_truth$EY_A0_Z1
+EY_A0_Z0 <- sim_truth$EY_A0_Z0
 
-EY1_ZW <- sim_truth_NIE$EY1_ZW
-EY0_ZW <- sim_truth_NIE$EY0_ZW
-pZ_A0 <- sim_truth_NIE$pZ_A0
-pZ_A1 <- sim_truth_NIE$pZ_A1
-pW <- sim_truth_NIE$pW
+EY1_ZW <- sim_truth$EY1_ZW
+EY0_ZW <- sim_truth$EY0_ZW
 
 # compute true NIE via empirical substitution estimator
 psi_NDE_true <- mean(EY_A1_Z0 - EY_A0_Z0)
