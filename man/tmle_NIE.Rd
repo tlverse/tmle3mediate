@@ -2,29 +2,29 @@
 % Please edit documentation in R/tmle3_Spec_NIE.R
 \name{tmle_NIE}
 \alias{tmle_NIE}
-\title{Outcome under Joint Static Intervention on Treatment and Mediator}
+\title{Defines a TML Estimator for the Natural Indirect Effect}
 \usage{
 tmle_NIE(e_learners, psi_Z_learners, max_iter = 10000, step_size = 1e-06, ...)
 }
 \arguments{
-\item{e_learners}{A \code{Stack} object, or other learner class (inheriting
-from \code{Lrnr_base}), containing a single or set of instantiated learners
-from the \code{sl3} package, to be used in fitting a cleverly parameterized
-propensity score that includes the mediators, i.e., e = P(A | Z, W).}
+\item{e_learners}{A \code{\link[sl3]{Stack}} (or other learner class that
+inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
+instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
+parameterized propensity score that conditions on the mediators, i.e.,
+e = P(A | Z, W).}
 
-\item{psi_Z_learners}{A \code{Stack} object, or other learner class
-(inheriting from \code{Lrnr_base}), containing a single or set of
-instantiated learners from the \code{sl3} package, to be used in fitting a
-reduced regression useful for computing the psi_Z nuisance parameter, i.e.,
-psi_Z(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W].}
+\item{psi_Z_learners}{A \code{\link[sl3]{Stack}} (or other learner class
+that inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or
+set of instantiated learners from \pkg{sl3}, to be used in a regression of
+a pseudo-outcome on the baseline covariates, i.e., psi_Z(W) =
+E\link{m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W}.}
 
-\item{max_iter}{A \code{numeric} setting the total number of iterations to be
-used in the targeted procedure based on universal least favorable
-submodels.}
+\item{max_iter}{A \code{numeric} setting the maximum iterations allowed in
+the targeting step based on universal least favorable submodels.}
 
 \item{step_size}{A \code{numeric} giving the step size (\code{delta_epsilon}
-in \code{tmle3}) to be used in the targeted procedure based on universal
-least favorable submodels.}
+in \code{tmle3}) to be used in the targeting step based on universal least
+favorable submodels.}
 
 \item{...}{Additional arguments (currently unused).}
 }

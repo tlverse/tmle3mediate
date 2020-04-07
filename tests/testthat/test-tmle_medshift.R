@@ -5,6 +5,7 @@ library(stringr)
 library(hal9001)
 library(sl3)
 library(tmle3)
+library(medshift)
 set.seed(7128816)
 delta_ipsi <- 0.5
 
@@ -86,7 +87,7 @@ learner_list <- list(
 )
 
 ## instantiate tmle3 spec for stochastic mediation
-tmle_spec <- tmle_medshift(
+tmle_spec <- tmle3mediate::tmle_medshift(
   delta = delta_ipsi,
   e_learners = cv_hal_binary_lrnr,
   phi_learners = cv_hal_contin_lrnr
@@ -109,12 +110,10 @@ updater$tmle_params <- tmle_params
 ## fit tmle update
 tmle_fit <- fit_tmle3(tmle_task, likelihood_targeted, tmle_params, updater)
 
-
 ## one-line call with faster with tmle3 wrapper
 set.seed(71281)
 tmle_fit <- tmle3(tmle_spec, data, node_list, learner_list)
 tmle_fit
-
 
 # fit one-step estimator
 set.seed(71281)
@@ -129,22 +128,8 @@ os_fit <- medshift(
 )
 summary(os_fit)
 
-# fit substitution estimator
-set.seed(71281)
-sub_fit <- medshift(
-  W = data[, ..w_names], A = data$A, Z = data[, ..z_names], Y = data$Y,
-  delta = delta_ipsi,
-  g_learners = hal_binary_lrnr,
-  e_learners = hal_binary_lrnr,
-  m_learners = hal_contin_lrnr,
-  phi_learners = hal_contin_lrnr,
-  estimator = "substitution",
-)
-summary(sub_fit)
-
-# test --- what exactly?
-test_that("TML estimate...", {
-})
+#test_that("TML estimate matches the one-step estimate closely enough", {
+#})
 
 ################################################################################
 if (FALSE) {

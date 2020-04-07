@@ -1,6 +1,7 @@
-#' Parameter for natuarl indirect effect
+#' Parameter for the natural indirect effect
 #'
-#' Parameter definition class. See https://www.ncbi.nlm.nih.gov/pubmed/22499725
+#' Parameter definition class. See
+#' <https://www.ncbi.nlm.nih.gov/pubmed/22499725>
 #'
 #' @importFrom R6 R6Class
 #' @importFrom uuid UUIDgenerate
@@ -15,36 +16,30 @@
 #' @format \code{\link{R6Class}} object.
 #'
 #' @section Constructor:
-#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ..., outcome_node)}
+#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+#'                      outcome_node)}
 #'
 #'   \describe{
-#'     \item{\code{observed_likelihood}}{A \code{\link{Likelihood}}
-#'           corresponding to the observed likelihood.
-#'     }
-#'     \item{\code{...}}{Not currently used.
-#'     }
-#'     \item{\code{outcome_node}}{character, the name of the node that should be
-#'           treated as the outcome
-#'     }
+#'     \item{\code{observed_likelihood}}{A \code{\link[tmle3]{Likelihood}}
+#'           corresponding to the observed likelihood.}
+#'     \item{\code{...}}{Not currently used.}
+#'     \item{\code{outcome_node}}{A \code{character}, giving the name of the
+#'           node that should be treated as the outcome.}
 #'   }
 #'
 #' @section Fields:
 #' \describe{
-#'     \item{\code{cf_likelihood_treatment}}{the counterfactual likelihood for
-#'           the treatment
-#'     }
-#'     \item{\code{cf_likelihood_control}}{the counterfactual likelihood for
-#'           the control
-#'     }
-#'     \item{\code{treatment_task}}{\code{\link{tmle3_Task}} object created from
-#'           setting the intervention to the treatment condition: do(A = 1).
-#'     }
-#'     \item{\code{control_task}}{\code{\link{tmle3_Task}} object created from
-#'           setting the intervention to the control condition: do(A = 0).
-#'     }
+#'     \item{\code{cf_likelihood_treatment}}{The counterfactual likelihood for
+#'           the treatment.}
+#'     \item{\code{cf_likelihood_control}}{The counterfactual likelihood for
+#'           the control.}
+#'     \item{\code{treatment_task}}{\code{\link[tmle3]{tmle3_Task}} created by
+#'           setting the intervention to the treatment condition: do(A = 1).}
+#'     \item{\code{control_task}}{\code{\link[tmle3]{tmle3_Task}} created by
+#'           setting the intervention to the control condition: do(A = 0).}
 #' }
+#'
 #' @export
-#
 Param_NIE <- R6::R6Class(
   classname = "Param_NIE",
   portable = TRUE,
@@ -101,10 +96,8 @@ Param_NIE <- R6::R6Class(
 
       # compute/extract g(1|W) and g(0|W)
       g_est <- likelihood$get_likelihood(tmle_task, "A", fold_number)
-      
       g1_est <- likelihood$get_likelihood(treatment_task, "A", fold_number)
       g0_est <- likelihood$get_likelihood(control_task, "A", fold_number)
-      
 
       # treatment/control indicators
       cf_pA_treatment <- cf_likelihood_treatment$get_likelihoods(
@@ -114,8 +107,8 @@ Param_NIE <- R6::R6Class(
         tmle_task, "A", fold_number
       )
       # clever covariates
-      HY <- (cf_pA_treatment / g1_est)  * (1-((1 - e_est) / e_est)) 
-      HZ <- (2*cf_pA_treatment-1) / g_est
+      HY <- (cf_pA_treatment / g1_est)  * (1 - ((1 - e_est) / e_est))
+      HZ <- (2 * cf_pA_treatment - 1) / g_est
 
       # output clever covariates
       return(list(Y = HY, Z = HZ))
@@ -156,9 +149,8 @@ Param_NIE <- R6::R6Class(
       psi_Z1_est <- likelihood$factor_list$psi_Z1$learner$predict_fold(
         full_psi_Z_task, fold_number
       )
-      
       psi_Z_est <- psi_Z1_est - psi_Z0_est
-      
+
       # clever_covariates happens here but this is repeated computation
       HY <- self$clever_covariates(
         tmle_task,
@@ -207,7 +199,7 @@ Param_NIE <- R6::R6Class(
     }
   ),
   private = list(
-    .type = "tmle3mediate_NIE",
+    .type = "NIE",
     .treatment_task = NULL,
     .control_task = NULL,
     .cf_likelihood_treatment = NULL,

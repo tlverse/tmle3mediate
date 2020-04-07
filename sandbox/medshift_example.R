@@ -37,9 +37,9 @@ m_learner <- phi_learner <-
 
 # Test different estimators
 reweighted_medshift <- medshift(W = example_data$W, A = example_data$A,
-                                 Z = example_data$Z, Y = example_data$Y,
-                                 delta = 3, estimator = "reweighted",
-                                 estimator_args = list(cv_folds = 3))
+                                Z = example_data$Z, Y = example_data$Y,
+                                delta = 3, estimator = "reweighted",
+                                estimator_args = list(cv_folds = 3))
 
 onestep_medshift <- medshift(W = example_data$W, A = example_data$A,
                              Z = example_data$Z, Y = example_data$Y,

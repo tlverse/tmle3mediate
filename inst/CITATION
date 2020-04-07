@@ -1,0 +1,17 @@
+citHeader("Please cite the following when using the 'tmle3mediate' software
+           package, including both the software tool and the article describing
+           the statistical methodology.")
+
+year <- format(Sys.Date(), "%Y")
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Manual",
+         title = "{tmle3mediate}: Targeted Learning for causal mediation analysis",
+         author = c(person("Nima", "Hejazi"),
+                    person("James", "Duncan"),
+                    person("David", "McCoy"),
+                    person("Jeremy", "Coyle")),
+         year = year,
+         note = note,
+         doi = "",
+         url = "https://github.com/tlverse/tmle3mediate")

@@ -23,8 +23,6 @@ environment:
     _R_CHECK_FORCE_SUGGESTS_: false
     USE_RTOOLS: true
     PKGTYPE: both
-    GITHUB_PAT:
-      secure: Nu6c5CmcVdYHDUVGej5ZIXGKOXVPBwqUwjrLV8d6UlbUaAtYuUhgpNuv9oLztAQQ
 
   matrix:
     - R_VERSION: release
@@ -34,9 +32,7 @@ build_script:
   - echo Current directory=%CD%
   - travis-tool.sh install_r base64
   - travis-tool.sh install_github r-lib/sessioninfo r-lib/covr
-  - travis-tool.sh install_github tlverse/delayed tlverse/origami tlverse/sl3
-  - travis-tool.sh install_github tlverse/tmle3 tlverse/hal9001
-  - travis-tool.sh install_github nhejazi/haldensify nhejazi/txshift
+  - travis-tool.sh install_github tlverse/sl3 tlverse/tmle3
   - travis-tool.sh install_deps
 
 test_script:
@@ -71,10 +67,9 @@ artifacts:
 notifications:
  - provider: Email
    to:
-     - jeremyrcoyle@gmail.com
      - nh@nimahejazi.org
    subject: 'r-appveyor build {{status}}'
-   message: "https://ci.appveyor.com/project/tlverse/tmle3shift"
+   message: "https://ci.appveyor.com/project/tlverse/tmle3mediate"
    on_build_success: false
    on_build_failure: true
    on_build_status_changed: true

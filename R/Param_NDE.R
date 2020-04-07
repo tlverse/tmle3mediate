@@ -1,6 +1,7 @@
-#' Parameter for natuarl direct effect
+#' Parameter for the natural direct effect
 #'
-#' Parameter definition class. See https://www.ncbi.nlm.nih.gov/pubmed/22499725
+#' Parameter definition class. See
+#' <https://www.ncbi.nlm.nih.gov/pubmed/22499725>
 #'
 #' @importFrom R6 R6Class
 #' @importFrom uuid UUIDgenerate
@@ -15,36 +16,30 @@
 #' @format \code{\link{R6Class}} object.
 #'
 #' @section Constructor:
-#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ..., outcome_node)}
+#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+#'                      outcome_node)}
 #'
 #'   \describe{
-#'     \item{\code{observed_likelihood}}{A \code{\link{Likelihood}}
-#'           corresponding to the observed likelihood.
-#'     }
-#'     \item{\code{...}}{Not currently used.
-#'     }
-#'     \item{\code{outcome_node}}{character, the name of the node that should be
-#'           treated as the outcome
-#'     }
+#'     \item{\code{observed_likelihood}}{A \code{\link[tmle3]{Likelihood}}
+#'           corresponding to the observed likelihood.}
+#'     \item{\code{...}}{Not currently used.}
+#'     \item{\code{outcome_node}}{A \code{character}, giving the name of the
+#'           node that should be treated as the outcome.}
 #'   }
 #'
 #' @section Fields:
 #' \describe{
-#'     \item{\code{cf_likelihood_treatment}}{the counterfactual likelihood for
-#'           the treatment
-#'     }
-#'     \item{\code{cf_likelihood_control}}{the counterfactual likelihood for
-#'           the control
-#'     }
-#'     \item{\code{treatment_task}}{\code{\link{tmle3_Task}} object created from
-#'           setting the intervention to the treatment condition: do(A = 1).
-#'     }
-#'     \item{\code{control_task}}{\code{\link{tmle3_Task}} object created from
-#'           setting the intervention to the control condition: do(A = 0).
-#'     }
+#'     \item{\code{cf_likelihood_treatment}}{The counterfactual likelihood for
+#'           the treatment.}
+#'     \item{\code{cf_likelihood_control}}{The counterfactual likelihood for
+#'           the control.}
+#'     \item{\code{treatment_task}}{\code{\link[tmle3]{tmle3_Task}} created by
+#'           setting the intervention to the treatment condition: do(A = 1).}
+#'     \item{\code{control_task}}{\code{\link{[tmle3]{tmle3_Task}} created by
+#'           setting the intervention to the control condition: do(A = 0).}
 #' }
+#'
 #' @export
-#
 Param_NDE <- R6::R6Class(
   classname = "Param_NDE",
   portable = TRUE,
@@ -89,7 +84,6 @@ Param_NDE <- R6::R6Class(
       if (is.null(tmle_task)) {
         tmle_task <- self$observed_likelihood$training_task
       }
-
       likelihood <- self$observed_likelihood
       treatment_task <- self$treatment_task
       control_task <- self$control_task
@@ -201,7 +195,7 @@ Param_NDE <- R6::R6Class(
     }
   ),
   private = list(
-    .type = "tmle3mediate_NDE",
+    .type = "NDE",
     .treatment_task = NULL,
     .control_task = NULL,
     .cf_likelihood_treatment = NULL,

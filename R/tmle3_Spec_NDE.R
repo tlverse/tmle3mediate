@@ -1,11 +1,9 @@
-#' Defines a TML Estimator for Outcome under Joint Static Intervention on
-#' Treatment and Mediator
+#' Defines a TML Estimator for the Natural Direct Effect
 #'
 #' @importFrom R6 R6Class
 #' @importFrom tmle3 tmle3_Spec define_lf tmle3_Update Targeted_Likelihood
 #'
 #' @export
-#
 tmle3_Spec_NDE <- R6::R6Class(
   classname = "tmle3_Spec_NDE",
   portable = TRUE,
@@ -78,7 +76,7 @@ tmle3_Spec_NDE <- R6::R6Class(
 
 ################################################################################
 
-#' Outcome under Joint Static Intervention on Treatment and Mediator
+#' Defines a TML Estimator for the Natural Direct Effect
 #'
 #' O = (W, A, Z, Y)
 #' W = Covariates (possibly multivariate)
@@ -86,25 +84,24 @@ tmle3_Spec_NDE <- R6::R6Class(
 #' Z = Mediators (binary or categorical; possibly multivariate)
 #' Y = Outcome (binary or bounded continuous)
 #'
-#' @param e_learners A \code{Stack} object, or other learner class (inheriting
-#'   from \code{Lrnr_base}), containing a single or set of instantiated learners
-#'   from the \code{sl3} package, to be used in fitting a cleverly parameterized
-#'   propensity score that includes the mediators, i.e., e = P(A | Z, W).
-#' @param psi_Z_learners A \code{Stack} object, or other learner class
-#'   (inheriting from \code{Lrnr_base}), containing a single or set of
-#'   instantiated learners from the \code{sl3} package, to be used in fitting a
-#'   reduced regression useful for computing the psi_Z nuisance parameter, i.e.,
-#'   psi_Z(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W].
-#' @param max_iter A \code{numeric} setting the total number of iterations to be
-#'   used in the targeted procedure based on universal least favorable
-#'   submodels.
+#' @param e_learners A \code{\link[sl3]{Stack}} (or other learner class that
+#'   inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
+#'   instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
+#'   parameterized propensity score that conditions on the mediators, i.e.,
+#'   e = P(A | Z, W).
+#' @param psi_Z_learners A \code{\link[sl3]{Stack}} (or other learner class
+#'   that inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or
+#'   set of instantiated learners from \pkg{sl3}, to be used in a regression of
+#'   a pseudo-outcome on the baseline covariates, i.e., psi_Z(W) =
+#'   E[m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W].
+#' @param max_iter A \code{numeric} setting the maximum iterations allowed in
+#'   the targeting step based on universal least favorable submodels.
 #' @param step_size A \code{numeric} giving the step size (\code{delta_epsilon}
-#'   in \code{tmle3}) to be used in the targeted procedure based on universal
-#'   least favorable submodels.
+#'   in \code{tmle3}) to be used in the targeting step based on universal least
+#'   favorable submodels.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @export
-#
 tmle_NDE <- function(e_learners, psi_Z_learners,
                      max_iter = 1e4, step_size = 1e-6,
                      ...) {
@@ -120,17 +117,18 @@ tmle_NDE <- function(e_learners, psi_Z_learners,
 
 #' Make task for derived likelihood factor psi_Z(W) for NDE
 #'
-#' @param tmle_task A \code{tmle3_Task} object specifying the data and the
-#'  NPSEM for use in constructing elements of TML estimator.
-#' @param likelihood A trained \code{Likelihood} object from \code{tmle3},
-#'  constructed via the helper function \code{stochastic_mediation_likelihood}.
+#' @param tmle_task A \code{[tmle3]{tmle3_Task}} specifying the data and NPSEM
+#'  for use in constructing components required for TML estimation.
+#' @param likelihood A trained \code{[tmle3]{Likelihood}}, constructed via the
+#'  \code{\link{stochastic_mediation_likelihood}} helper.
 #'
-#' @importFrom data.table as.data.table data.table
+#' @importFrom data.table as.data.table data.table setnames
 #' @importFrom uuid UUIDgenerate
 #' @importFrom sl3 sl3_Task
 #'
+#' @name make_NDE_psi_task
+#'
 #' @keywords internal
-#
 make_NDE_psi_Z_task <- function(tmle_task, likelihood) {
   # create treatment and control tasks for intervention conditions
   # TODO: remove node name hard-coding
@@ -155,15 +153,17 @@ make_NDE_psi_Z_task <- function(tmle_task, likelihood) {
     m_diff = m_diff,
     tmle_task$get_tmle_node("W")
   ))
+  data.table::setnames(psi_Z_data,
+                       c("m_pseudo", tmle_task$npsem[["W"]]$variables))
   psi_Z_task <- sl3::sl3_Task$new(
     data = psi_Z_data,
-    outcome = "m_diff",
+    outcome = "m_pseudo",
     covariates = tmle_task$npsem[["W"]]$variables,
-    outcome_type = "continuous"
+    outcome_type = "continuous",
+    folds = tmle_task$folds
   )
 
   # subset data: control observations only
   control_row_index <- tmle_task$get_tmle_node("A") == 0
-
   return(psi_Z_task$subset_task(control_row_index))
 }

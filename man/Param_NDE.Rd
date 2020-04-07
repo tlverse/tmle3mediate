@@ -2,45 +2,42 @@
 % Please edit documentation in R/Param_NDE.R
 \name{Param_NDE}
 \alias{Param_NDE}
-\title{Parameter for natuarl direct effect}
-\format{\code{\link{R6Class}} object.}
+\title{Parameter for the natural direct effect}
+\format{
+\code{\link{R6Class}} object.
+}
 \value{
 \code{Param_base} object
 }
 \description{
-Parameter definition class. See https://www.ncbi.nlm.nih.gov/pubmed/22499725
+Parameter definition class. See
+\url{https://www.ncbi.nlm.nih.gov/pubmed/22499725}
 }
 \section{Constructor}{
 
-  \code{define_param(Param_ATT, observed_likelihood, intervention_list, ..., outcome_node)}
+\code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+                     outcome_node)}
 
-  \describe{
-    \item{\code{observed_likelihood}}{A \code{\link{Likelihood}}
-          corresponding to the observed likelihood.
-    }
-    \item{\code{...}}{Not currently used.
-    }
-    \item{\code{outcome_node}}{character, the name of the node that should be
-          treated as the outcome
-    }
-  }
+\describe{
+\item{\code{observed_likelihood}}{A \code{\link[tmle3]{Likelihood}}
+corresponding to the observed likelihood.}
+\item{\code{...}}{Not currently used.}
+\item{\code{outcome_node}}{A \code{character}, giving the name of the
+node that should be treated as the outcome.}
+}
 }
 
 \section{Fields}{
 
 \describe{
-    \item{\code{cf_likelihood_treatment}}{the counterfactual likelihood for
-          the treatment
-    }
-    \item{\code{cf_likelihood_control}}{the counterfactual likelihood for
-          the control
-    }
-    \item{\code{treatment_task}}{\code{\link{tmle3_Task}} object created from
-          setting the intervention to the treatment condition: do(A = 1).
-    }
-    \item{\code{control_task}}{\code{\link{tmle3_Task}} object created from
-          setting the intervention to the control condition: do(A = 0).
-    }
+\item{\code{cf_likelihood_treatment}}{The counterfactual likelihood for
+the treatment.}
+\item{\code{cf_likelihood_control}}{The counterfactual likelihood for
+the control.}
+\item{\code{treatment_task}}{\code{\link[tmle3]{tmle3_Task}} created by
+setting the intervention to the treatment condition: do(A = 1).}
+\item{\code{control_task}}{\code{\link{[tmle3]{tmle3_Task}} created by
+          setting the intervention to the control condition: do(A = 0).}
 }
 }
 
@@ -51,63 +48,3 @@ Other Parameters:
 }
 \concept{Parameters}
 \keyword{data}
-\section{Super class}{
-\code{\link[tmle3:Param_base]{tmle3::Param_base}} -> \code{Param_NDE}
-}
-\section{Methods}{
-\subsection{Public methods}{
-\itemize{
-\item \href{#method-new}{\code{Param_NDE$new()}}
-\item \href{#method-clever_covariates}{\code{Param_NDE$clever_covariates()}}
-\item \href{#method-estimates}{\code{Param_NDE$estimates()}}
-\item \href{#method-clone}{\code{Param_NDE$clone()}}
-}
-}
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="tmle3" data-topic="Param_base" data-id="print">}\href{../../tmle3/html/Param_base.html#method-print}{\code{tmle3::Param_base$print()}}\out{</span>}
-}
-\out{</details>}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Param_NDE$new(observed_likelihood, ..., outcome_node = "Y")}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clever_covariates"></a>}}
-\subsection{Method \code{clever_covariates()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Param_NDE$clever_covariates(tmle_task = NULL, fold_number = "full")}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-estimates"></a>}}
-\subsection{Method \code{estimates()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Param_NDE$estimates(tmle_task = NULL, fold_number = "full")}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Param_NDE$clone(deep = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
-}

@@ -1,5 +1,5 @@
 Package: tmle3mediate
-Title: Mediation Analysis with Targeted Minimum Loss Estimation
+Title: Targeted Learning for Causal Mediation Analysis
 Version: 0.0.1
 Authors@R:
     person(given = "First",
@@ -24,19 +24,22 @@ Suggests:
     rmarkdown,
     covr,
     stats,
+    stringr,
     ggplot2,
+    dplyr,
     Rsolnp,
     nnls,
+    hal9001,
     medshift
 Remotes:
-    github::nhejazi/medshift,
-    github::tlverse/origami,
     github::tlverse/sl3,
-    github::tlverse/tmle3
+    github::tlverse/tmle3,
+    github::nhejazi/medshift
 URL: https://tlverse.org/tmle3mediate
 BugReports: https://github.com/tlverse/tmle3mediate/issues
 License: GPL-3
 Encoding: UTF-8
 LazyLoad: yes
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
+Roxygen: list(markdown = TRUE, r6 = FALSE)
