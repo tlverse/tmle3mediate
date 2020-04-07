@@ -1,57 +1,50 @@
----
-output:
-  rmarkdown::github_document
-bibliography: "inst/REFERENCES.bib"
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
-)
-```
-
 # R/`tmle3mediate`
 
-[![Travis-CI Build Status](https://travis-ci.org/tlverse/tmle3mediate.svg?branch=master)](https://travis-ci.org/tlverse/tmle3mediate)
-[![AppVeyor Build  Status](https://ci.appveyor.com/api/projects/status/github/tlverse/tmle3mediate?branch=master&svg=true)](https://ci.appveyor.com/project/tlverse/tmle3mediate)
-[![Coverage Status](https://img.shields.io/codecov/c/github/tlverse/tmle3mediate/master.svg)](https://codecov.io/github/tlverse/tmle3mediate?branch=master)
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![Travis-CI Build
+Status](https://travis-ci.org/tlverse/tmle3mediate.svg?branch=master)](https://travis-ci.org/tlverse/tmle3mediate)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/tlverse/tmle3mediate?branch=master&svg=true)](https://ci.appveyor.com/project/tlverse/tmle3mediate)
+[![Coverage
+Status](https://img.shields.io/codecov/c/github/tlverse/tmle3mediate/master.svg)](https://codecov.io/github/tlverse/tmle3mediate?branch=master)
+[![Project Status: WIP – Initial development is in progress, but there
+has not yet been a stable, usable release suitable for the
+public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![MIT
+license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
 > Targeted Learning for Causal Mediation Analysis
 
-__Authors:__ [TO FILL IN]
+**Authors:** \[TO FILL IN\]
 
----
+-----
 
-## What's `tmle3mediate`?
+## What’s `tmle3mediate`?
 
-The `tmle3mediate` R package is designed to [TO FILL IN]
+The `tmle3mediate` R package is designed to \[TO FILL IN\]
 
----
+-----
 
 ## Installation
 
-Install the most recent _stable release_ from GitHub via
+Install the most recent *stable release* from GitHub via
 [`remotes`](https://CRAN.R-project.org/package=remotes):
 
-```{r gh-master-installation, eval=FALSE}
+``` r
 remotes::install_github("tlverse/tmle3mediate")
 ```
 
----
+-----
 
 ## Example
 
-To illustrate how `tmle3mediate` may be used to estimate the effect of applying
-a stochastic intervention to the treatment (`A`) while keeping the mediator(s)
-(`Z`) fixed, consider the following example:
+To illustrate how `tmle3mediate` may be used to estimate the effect of
+applying a stochastic intervention to the treatment (`A`) while keeping
+the mediator(s) (`Z`) fixed, consider the following example:
 
-```{r simple_example, message=FALSE, warning=FALSE}
+``` r
 library(data.table)
 library(origami)
 library(sl3)
@@ -100,38 +93,42 @@ tmle_spec <- tmle_medshift(delta = delta_ipsi,
                            max_iter = 5)
 tmle_out <- tmle3(tmle_spec, example_data, node_list, learner_list)
 tmle_out
+#> A tmle3_Fit that took 5 step(s)
+#>    type         param  init_est  tmle_est        se     lower   upper
+#> 1: PIDE E[Y_{A=NULL}] 0.7938906 0.7927064 0.2039544 0.3929632 1.19245
+#>    psi_transformed lower_transformed upper_transformed
+#> 1:       0.7927064         0.3929632           1.19245
 ```
 
----
+-----
 
 ## Issues
 
-If you encounter any bugs or have any specific feature requests, please [file an
-issue](https://github.com/tlverse/tmle3mediate/issues).
+If you encounter any bugs or have any specific feature requests, please
+[file an issue](https://github.com/tlverse/tmle3mediate/issues).
 
----
+-----
 
 ## Contributions
 
-Contributions are very welcome. Interested contributors should consult our
-[contribution
+Contributions are very welcome. Interested contributors should consult
+our [contribution
 guidelines](https://github.com/tlverse/tmle3mediate/blob/master/CONTRIBUTING.md)
 prior to submitting a pull request.
 
----
+-----
 
 ## Citation
 
 After using the `tmle3mediate` R package, please cite the following:
 
----
+-----
 
 ## License
 
-The contents of this repository are distributed under the GPL-3 license. See
-file `LICENSE` for details.
+The contents of this repository are distributed under the GPL-3 license.
+See file `LICENSE` for details.
 
----
+-----
 
 ## References
-
