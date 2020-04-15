@@ -49,7 +49,8 @@ tmle3_Spec_NDE <- R6::R6Class(
       )
       lf_psi_Z <- tmle3::define_lf(
         tmle3::LF_derived, "psi_Z", self$options$psi_Z_learners,
-        targeted_likelihood, make_NDE_psi_Z_task
+        targeted_likelihood,
+        psi_Z_task_factory(subset_value = 0, param_type = "NDE")
       )
       targeted_likelihood$add_factors(lf_e)
       targeted_likelihood$add_factors(lf_psi_Z)
@@ -111,59 +112,4 @@ tmle_NDE <- function(e_learners, psi_Z_learners,
     max_iter, step_size,
     ...
   )
-}
-
-################################################################################
-
-#' Make task for derived likelihood factor psi_Z(W) for NDE
-#'
-#' @param tmle_task A \code{[tmle3]{tmle3_Task}} specifying the data and NPSEM
-#'  for use in constructing components required for TML estimation.
-#' @param likelihood A trained \code{[tmle3]{Likelihood}}, constructed via the
-#'  \code{\link{stochastic_mediation_likelihood}} helper.
-#'
-#' @importFrom data.table as.data.table data.table setnames
-#' @importFrom uuid UUIDgenerate
-#' @importFrom sl3 sl3_Task
-#'
-#' @name make_NDE_psi_task
-#'
-#' @keywords internal
-make_NDE_psi_Z_task <- function(tmle_task, likelihood) {
-  # create treatment and control tasks for intervention conditions
-  # TODO: remove node name hard-coding
-  treatment_task <-
-    tmle_task$generate_counterfactual_task(
-      uuid = uuid::UUIDgenerate(),
-      new_data = data.table::data.table(A = 1)
-    )
-  control_task <-
-    tmle_task$generate_counterfactual_task(
-      uuid = uuid::UUIDgenerate(),
-      new_data = data.table::data.table(A = 0)
-    )
-
-  # create counterfactual outcomes and construct pseudo-outcome
-  m1 <- likelihood$get_likelihood(treatment_task, "Y")
-  m0 <- likelihood$get_likelihood(control_task, "Y")
-  m_diff <- m1 - m0
-
-  # create regression task for pseudo-outcome and baseline covariates
-  psi_Z_data <- data.table::as.data.table(list(
-    m_diff = m_diff,
-    tmle_task$get_tmle_node("W")
-  ))
-  data.table::setnames(psi_Z_data,
-                       c("m_pseudo", tmle_task$npsem[["W"]]$variables))
-  psi_Z_task <- sl3::sl3_Task$new(
-    data = psi_Z_data,
-    outcome = "m_pseudo",
-    covariates = tmle_task$npsem[["W"]]$variables,
-    outcome_type = "continuous",
-    folds = tmle_task$folds
-  )
-
-  # subset data: control observations only
-  control_row_index <- tmle_task$get_tmle_node("A") == 0
-  return(psi_Z_task$subset_task(control_row_index))
 }
