@@ -48,7 +48,7 @@ make_simulated_data <- function(n_obs = 10000, # no. observations
   z2_prob <- plogis((A - 1) + W[, 2] / (W[, 3] + 3))
   Z_2 <- rbinom(n_obs, 1, prob = z2_prob)
   ## 3rd mediator (binary)
-  z3_prob <- plogis((A - 1) + 2 * W[, 1]^3 - 1 / (2 * W[, 1] + 0.5))
+  z3_prob <- plogis((A - 1)^2 + 2 * W[, 1]^3 - 1 / (2 * W[, 1] + 0.5))
   Z_3 <- rbinom(n_obs, 1, prob = z3_prob)
   ## build matrix of mediators
   Z <- cbind(Z_1, Z_2, Z_3)
@@ -175,8 +175,8 @@ get_sim_truth_NIE_NDE <- function(n_obs = 1e7, # number of observations
   Z_1_0 <- rbinom(n_obs, 1, prob = z1_prob_0)
 
   # Z_2 counterfactuals
-  z2_prob_1 <- plogis((1 - 1)^3 + W$W_2 / (W$W_3 + 3))
-  z2_prob_0 <- plogis((0 - 1)^3 + W$W_2 / (W$W_3 + 3))
+  z2_prob_1 <- plogis((1 - 1) + W$W_2 / (W$W_3 + 3))
+  z2_prob_0 <- plogis((0 - 1) + W$W_2 / (W$W_3 + 3))
   Z_2_1 <- rbinom(n_obs, 1, prob = z2_prob_1)
   Z_2_0 <- rbinom(n_obs, 1, prob = z2_prob_0)
 
