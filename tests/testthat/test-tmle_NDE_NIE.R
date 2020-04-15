@@ -94,18 +94,18 @@ tmle_spec_NIE <- tmle_NIE(
 )
 
 ## define data (from tmle3_Spec base class)
-tmle_task_NIE <- tmle_spec_NIE$make_tmle_task_NIE(data, node_list)
+tmle_task_NIE <- tmle_spec_NIE$make_tmle_task(data, node_list)
 
 ## define likelihood (from tmle3_Spec base class)
 likelihood_init_NIE <- tmle_spec_NIE$make_initial_likelihood(tmle_task_NIE, learner_list)
 
 ## define update method (submodel and loss function)
-updater_NIE <- tmle_spec_NIE$make_updater_NIE()
+updater_NIE <- tmle_spec_NIE$make_updater()
 likelihood_targeted_NIE <- Targeted_Likelihood$new(likelihood_init_NIE, updater_NIE)
 
 ## define param
 tmle_params_NIE <- tmle_spec_NIE$make_params(tmle_task_NIE, likelihood_targeted_NIE)
-updater_NIE$tmle_params_NIE <- tmle_params_NIE
+updater_NIE$tmle_params <- tmle_params_NIE
 
 ## fit tmle update
 tmle_fit_NIE <- fit_tmle3(tmle_task_NIE, likelihood_targeted_NIE, tmle_params_NIE, updater_NIE)
@@ -126,18 +126,18 @@ tmle_spec_NDE <- tmle_NDE(
 )
 
 ## define data (from tmle3_Spec base class)
-tmle_task_NDE <- tmle_spec_NDE$make_tmle_task_NDE(data, node_list)
+tmle_task_NDE <- tmle_spec_NDE$make_tmle_task(data, node_list)
 
 ## define likelihood (from tmle3_Spec base class)
 likelihood_init_NDE <- tmle_spec_NDE$make_initial_likelihood(tmle_task_NDE, learner_list)
 
 ## define update method (submodel and loss function)
-updater_NDE <- tmle_spec_NDE$make_updater_NDE()
+updater_NDE <- tmle_spec_NDE$make_updater()
 likelihood_targeted_NDE <- Targeted_Likelihood$new(likelihood_init_NDE, updater_NDE)
 
 ## define param
 tmle_params_NDE <- tmle_spec_NDE$make_params(tmle_task_NDE, likelihood_targeted_NDE)
-updater_NDE$tmle_params_NDE <- tmle_params_NDE
+updater_NDE$tmle_params <- tmle_params_NDE
 
 ## fit tmle update
 tmle_fit_NDE <- fit_tmle3(tmle_task_NDE, likelihood_targeted_NDE, tmle_params_NDE, updater_NDE)
