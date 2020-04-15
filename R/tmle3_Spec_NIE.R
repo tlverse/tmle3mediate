@@ -50,14 +50,12 @@ tmle3_Spec_NIE <- R6::R6Class(
 
       lf_psi_Z0 <- tmle3::define_lf(
         tmle3::LF_derived, "psi_Z0", self$options$psi_Z_learners,
-        targeted_likelihood,
-        psi_Z_task_factory(subset_value = 0, param_type = "NIE")
+        targeted_likelihood, make_NIE_psi_Z0_task
       )
 
       lf_psi_Z1 <- tmle3::define_lf(
         tmle3::LF_derived, "psi_Z1", self$options$psi_Z_learners,
-        targeted_likelihood,
-        psi_Z_task_factory(subset_value = 1, param_type = "NIE")
+        targeted_likelihood, make_NIE_psi_Z1_task
       )
       targeted_likelihood$add_factors(lf_e)
       targeted_likelihood$add_factors(lf_psi_Z0)
@@ -119,5 +117,36 @@ tmle_NIE <- function(e_learners, psi_Z_learners,
     e_learners, psi_Z_learners,
     max_iter, step_size,
     ...
+  )
+}
+
+###############################################################################
+
+#' Make task for derived likelihood factor psi_Z(W) for NIE
+#'
+#' @param tmle_task A \code{[tmle3]{tmle3_Task}} specifying the data and NPSEM
+#'  for use in constructing components required for TML estimation.
+#' @param likelihood A trained \code{[tmle3]{Likelihood}}, constructed via the
+#'  \code{\link{stochastic_mediation_likelihood}} helper.
+#'
+#' @importFrom data.table as.data.table data.table setnames
+#' @importFrom uuid UUIDgenerate
+#' @importFrom sl3 sl3_Task
+#'
+#' @name make_NIE_psi_task
+#'
+#' @keywords internal
+make_NIE_psi_Z0_task <- function(tmle_task, likelihood) {
+  mediator_task_fun_factory(param_type = "NIE", subset_value = 0)(
+    tmle_task, likelihood
+  )
+}
+
+#' @rdname make_NIE_psi_task
+#'
+#' @keywords internal
+make_NIE_psi_Z1_task <- function(tmle_task, likelihood) {
+  mediator_task_fun_factory(param_type = "NIE", subset_value = 1)(
+    tmle_task, likelihood
   )
 }

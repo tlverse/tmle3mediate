@@ -236,38 +236,7 @@ make_e_task <- function(tmle_task, likelihood) {
 #'
 #' @keywords internal
 make_phi_task <- function(tmle_task, likelihood) {
-  # create treatment and control tasks for intervention conditions
-  treatment_task <-
-    tmle_task$generate_counterfactual_task(
-      uuid = uuid::UUIDgenerate(),
-      new_data = data.table::data.table(A = 1)
-    )
-  control_task <-
-    tmle_task$generate_counterfactual_task(
-      uuid = uuid::UUIDgenerate(),
-      new_data = data.table::data.table(A = 0)
-    )
-
-  # create counterfactual outcomes and construct pseudo-outcome
-  m1 <- likelihood$get_likelihood(treatment_task, "Y")
-  m0 <- likelihood$get_likelihood(control_task, "Y")
-  m_diff <- m1 - m0
-
-  # create data for pseudo-outcome regression on baseline covariates
-  phi_data <- data.table::as.data.table(list(
-    m_pseudo = m_diff,
-    tmle_task$get_tmle_node("W")
-  ))
-  data.table::setnames(phi_data,
-                       c("m_pseudo", tmle_task$npsem[["W"]]$variables))
-
-  # create task while preserving original fold structure from input task
-  phi_task <- sl3::sl3_Task$new(
-    data = phi_data,
-    outcome = "m_pseudo",
-    covariates = tmle_task$npsem[["W"]]$variables,
-    outcome_type = "continuous",
-    folds = tmle_task$folds
+  mediator_task_fun_factory(param_type = "medshift")(
+    tmle_task, likelihood
   )
-  return(phi_task)
 }
