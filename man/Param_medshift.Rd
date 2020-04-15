@@ -3,9 +3,7 @@
 \name{Param_medshift}
 \alias{Param_medshift}
 \title{Parameter for the Population Intervention (In)direct Effects}
-\format{
-\code{\link[R6]{R6Class}} object.
-}
+\format{\code{\link[R6]{R6Class}} object.}
 \value{
 \code{\link[tmle3]{Param_base}} object.
 }

@@ -30,7 +30,8 @@ Suggests:
     Rsolnp,
     nnls,
     hal9001,
-    medshift
+    medshift,
+    speedglm
 Remotes:
     github::tlverse/sl3,
     github::tlverse/tmle3,

@@ -3,9 +3,7 @@
 \name{Param_NDE}
 \alias{Param_NDE}
 \title{Parameter for the natural direct effect}
-\format{
-\code{\link{R6Class}} object.
-}
+\format{\code{\link{R6Class}} object.}
 \value{
 \code{Param_base} object
 }
