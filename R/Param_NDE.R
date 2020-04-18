@@ -35,7 +35,7 @@
 #'           the control.}
 #'     \item{\code{treatment_task}}{\code{\link[tmle3]{tmle3_Task}} created by
 #'           setting the intervention to the treatment condition: do(A = 1).}
-#'     \item{\code{control_task}}{\code{\link{[tmle3]{tmle3_Task}} created by
+#'     \item{\code{control_task}}{\code{\link[tmle3]{tmle3_Task}} created by
 #'           setting the intervention to the control condition: do(A = 0).}
 #' }
 #'
