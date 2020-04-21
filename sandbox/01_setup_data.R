@@ -1,6 +1,6 @@
 library(here)
 library(tidyverse)
-source(here("dgp_funs.R"))
+source(here("/tests/testthat/helper-dgp.R"))
 
 # generate data based on DGP components
 sim_data <- function(n_obs) {

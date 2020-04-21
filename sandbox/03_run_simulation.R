@@ -15,28 +15,29 @@ library(tidyverse)
 library(hal9001)
 library(origami)
 library(sl3)
-library(tml3e)
+library(tmle3)
 library(tmle3mediate)
 
 # load scripts, parallelization, PRNG
-source(here("01_setup_data.R"))
-source(here("02_fit_estimators.R"))
+source(here("sandbox/01_setup_data.R"))
+source(here("sandbox/02_fit_estimators.R"))
 registerDoFuture()
-plan(multiprocess, workers = 24)
+plan(multiprocess)
 
 # simulation parameters
 set.seed(7259)
-n_sim <- 500                                  # number of simulations
+n_sim <- 2                                   # number of simulations
 n_obs <- cumsum(rep(sqrt(100), 5))^2          # sample sizes at root-n scale
-
+n_obs <- n_obs[c(1,2)]
 # perform simulation across sample sizes
 sim_results <- lapply(n_obs, function(sample_size) {
   # get results in parallel
   results <- foreach(this_iter = seq_len(n_sim),
                      .options.multicore = list(preschedule = FALSE),
-                     .errorhandling = "remove") %dorng% {
+                     .errorhandling = "remove") %do% {
     data_sim <- sim_data(n_obs = sample_size)
     est_out <- fit_estimators(data = data_sim)
+    #browser()
     return(est_out)
   }
 
