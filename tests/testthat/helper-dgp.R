@@ -19,7 +19,7 @@ make_dgp <- function() {
   m_mech <- function(w, a, z, eps_sd = 0.5) {
     w <- data.frame(w)
     z <- data.frame(z)
-    y <- z[,1] + z[,2] - z[,3] + exp(a + z[,3] / (1 + rowSums(w)^2)) +
+    y <- z[,1]^2 + z[,2]^2 - z[,3] + exp(a + z[,3] / (1 + rowSums(w)^2)) +
       rnorm(length(a), mean = 0, sd = eps_sd)
     return(y)
   }

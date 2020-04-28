@@ -3,21 +3,22 @@
 ###############################################################################
 fit_estimators <- function(data, cv_folds = 5) {
   ## NOTE: need to force `family = "gaussian"` to use `lambda.min.ratio`
-  # hal_lrnr <- Lrnr_hal9001$new(max_degree = NULL,
-  #                              n_folds = 5,
-  #                              fit_type = "glmnet",
-  #                              use_min = TRUE,
-  #                              type.measure = "deviance",
-  #                              standardize = FALSE,
-  #                              family = "gaussian",
-  #                              lambda.min.ratio = 1 / nrow(data),
-  #                              nlambda = 500,
-  #                              yolo = FALSE)
+  hal_lrnr <- Lrnr_hal9001$new(max_degree = NULL,
+                               n_folds = 5,
+                               fit_type = "glmnet",
+                               use_min = TRUE,
+                               type.measure = "deviance",
+                               standardize = FALSE,
+                               family = "gaussian",
+                               lambda.min.ratio = 1 / nrow(data),
+                               nlambda = 500,
+                               yolo = FALSE)
 
   # instantiate some learners
   mean_lrnr <- Lrnr_mean$new()
   fglm_contin_lrnr <- Lrnr_glm_fast$new()
   fglm_binary_lrnr <- Lrnr_glm_fast$new(family = binomial())
+
   hal_contin_lrnr <- Lrnr_hal9001$new(
     fit_type = "glmnet", n_folds = 5
   )
