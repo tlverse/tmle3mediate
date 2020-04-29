@@ -1,6 +1,6 @@
 # set user-specific package library
 if (grepl("savio2", Sys.info()["nodename"])) {
-  .libPaths("/global/scratch/nhejazi/R")
+  .libPaths("/global/scratch/jpduncan/R")
   Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 }
 
@@ -14,12 +14,12 @@ pkgbuild:::cache_set("has_compiler", TRUE)
 install.packages(c("here", "tidyverse", "remotes", "future", "future.apply",
                    "doFuture", "foreach", "doRNG", "data.table", "devtools",
                    "Rsolnp", "nnls", "glmnet", "Rcpp", "origami", "hal9001"),
-                 lib = "/global/scratch/nhejazi/R")
+                 lib = "/global/scratch/jpduncan/R")
 
 # use remotes to install from GitHub
 remotes::install_github(c("tlverse/sl3@master",
-                          "tlverse/tmle3mediate@master"),
-                        lib = "/global/scratch/nhejazi/R")
+			  "tlverse/tmle3@master"),
+                        lib = "/global/scratch/jpduncan/R")
 
 # update all packages
-update.packages(ask = FALSE, lib.loc = "/global/scratch/nhejazi/R")
+update.packages(ask = FALSE, lib.loc = "/global/scratch/jpduncan/R")
