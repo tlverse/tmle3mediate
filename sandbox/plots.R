@@ -1,5 +1,6 @@
 library(tidyverse)
 library(here)
+library(ggpubr)
 
 source(here("get_truth.R"))
 
@@ -72,8 +73,15 @@ make_sim_statistics_plot <- function(sim_statistics_long, est_type) {
     theme_bw()
 }
 
+NDE_stats_plot <- make_sim_statistics_plot(sim_statistics_long, 'NDE') +
+  ggtitle('NDE')
+
+NIE_stats_plot <- make_sim_statistics_plot(sim_statistics_long, 'NIE') +
+  ggtitle('NIE')
+
 ggsave(
   'plots/simulation_statistics.png',
-  make_sim_statistics_plot(sim_statistics_long, 'NDE'),
+  ggarrange(NDE_stats_plot, NIE_stats_plot, ncol = 2),
+  width = 13,
   device = png()
 )
