@@ -56,7 +56,6 @@ learner_list <- list(
 tmle_spec_NIE <- tmle_NIE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100 # TODO: use default when convergence bug fixed
 )
 
 set.seed(71281)
@@ -87,7 +86,6 @@ tmle_fit_NIE <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
 tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100 # TODO: use default when convergence bug fixed
 )
 
 ## define data (from tmle3_Spec base class)
