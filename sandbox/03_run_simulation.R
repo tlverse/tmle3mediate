@@ -1,6 +1,9 @@
+# be sure to set this env variable by `export R_LIBDIR=/path/to/your/R/libs`
+r_libdir <- Sys.getenv("R_LIBDIR")
+
 # set user-specific package library
 if (grepl("savio2", Sys.info()["nodename"])) {
-  .libPaths("/global/scratch/jpduncan/R")
+  .libPaths(r_libdir)
   Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 }
 
@@ -16,7 +19,7 @@ library(hal9001)
 library(origami)
 library(sl3)
 library(tmle3)
-devtools::load_all('/global/home/users/jpduncan/R/nde-nie/tmle3mediate')
+devtools::load_all(here())
 
 # load scripts, parallelization, PRNG
 source(here("01_setup_data.R"))
@@ -37,7 +40,6 @@ sim_results <- lapply(n_obs, function(sample_size) {
                      .errorhandling = "remove") %dorng% {
     data_sim <- sim_data(n_obs = sample_size)
     est_out <- fit_estimators(data = data_sim)
-    #browser()
     return(est_out)
   }
 
