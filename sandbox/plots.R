@@ -13,7 +13,7 @@ EY_A0_Z0 <- sim_truth$EY_A0_Z0
 psi_NDE_true <- mean(EY_A1_Z0 - EY_A0_Z0)
 psi_NIE_true <- mean(EY_A1_Z1 - EY_A1_Z0)
 
-sim_results <- readRDS(here('data/tmle3mediate_2020-04-29_03:36:33.rds'))
+sim_results <- readRDS(here('data/tmle3mediate_2020-05-01_11:14:45.rds'))
 
 # combine simulation results into one big df with n_obs column
 sim_results <- names(sim_results) %>% map_dfr(
@@ -53,24 +53,30 @@ sim_statistics <- sim_results %>%
     abs_bias = abs(est_bias),
     sqrt_n_abs_bias = sqrt(n_obs) * abs(est_bias),
     sqrt_n_sd = sqrt(n_obs) * est_sd,
-    sqrt_nMSE = sqrt(n_obs*est_MSE)
+    n_MSE = n_obs*est_MSE
   ) %>%
   ungroup
 
 sim_statistics_long <- sim_statistics %>%
   gather(statistic, value, -c(n_obs, type, sim_type))
 
+n_obs <- (cumsum(rep(sqrt(100), 8))^2)[-1]
+
 make_sim_statistics_plot <- function(sim_statistics_long, est_type) {
   filtered_sim_stats <- sim_statistics_long %>%
     filter(
       type == est_type,
-      statistic %in% c("abs_bias", "sqrt_n_abs_bias", "sqrt_n_sd", "sqrt_nMSE")
+      statistic %in% c("abs_bias", "sqrt_n_abs_bias", "sqrt_n_sd", "n_MSE")
     )
 
   ggplot(filtered_sim_stats, aes(n_obs, value)) +
     geom_point() + geom_line(linetype = "dashed") +
     facet_grid(statistic ~ sim_type, scales = "free_y") +
-    theme_bw()
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle=45, vjust=1, hjust=1)
+    ) +
+    scale_x_continuous(breaks=n_obs)
 }
 
 NDE_stats_plot <- make_sim_statistics_plot(sim_statistics_long, 'NDE') +
