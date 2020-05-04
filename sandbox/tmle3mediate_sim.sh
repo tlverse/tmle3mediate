@@ -12,5 +12,7 @@
 module load r/3.6.3
 module load r-packages
 
+## Set SBATCH_ACCOUNT and SBATCH_QOS env variables prior to running
+
 ### for foreach+doSNOW ###
 R CMD BATCH --no-save 03_run_simulation.R

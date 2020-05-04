@@ -29,15 +29,10 @@ fit_estimators <- function(data, cv_folds = 5) {
   cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
   cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 
-  # meta-learner to ensure predicted probabilities do not go outside [0,1]
-  logistic_metalearner <- make_learner(Lrnr_solnp,
-                                       metalearner_logistic_binomial,
-                                       loss_loglik_binomial)
-
   # set nuisance regression learners based on ID's successful simulations
   sl <- Lrnr_sl$new(learners = list(hal_lrnr),
                     metalearner = Lrnr_nnls$new())
-                    #metalearner = logistic_metalearner)
+
   node_list <- list(
     W = c("W1", "W2", "W3"),
     A = "A",
@@ -55,8 +50,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NIE <- tmle_NIE(
     e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = cv_hal_contin_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = cv_hal_contin_lrnr
   )
 
   NIE_est_corr <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
@@ -64,8 +58,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NDE <- tmle_NDE(
     e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = cv_hal_contin_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = cv_hal_contin_lrnr
   )
 
   NDE_est_corr <- tmle3(tmle_spec_NDE, data, node_list, learner_list)
@@ -77,8 +70,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NIE <- tmle_NIE(
     e_learners = mean_lrnr,
-    psi_Z_learners = cv_hal_contin_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = cv_hal_contin_lrnr
   )
 
   NIE_est_mis_e <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
@@ -86,8 +78,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NDE <- tmle_NDE(
     e_learners = mean_lrnr,
-    psi_Z_learners = cv_hal_contin_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = cv_hal_contin_lrnr
   )
 
   NDE_est_mis_e <- tmle3(tmle_spec_NDE, data, node_list, learner_list)
@@ -100,8 +91,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NIE <- tmle_NIE(
     e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = mean_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = mean_lrnr
   )
 
   NIE_est_mis_z <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
@@ -109,8 +99,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   tmle_spec_NDE <- tmle_NDE(
     e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = mean_lrnr,
-    max_iter = 100 # TODO: use default when convergence bug fixed
+    psi_Z_learners = mean_lrnr
   )
 
   NDE_est_mis_z <- tmle3(tmle_spec_NDE, data, node_list, learner_list)
