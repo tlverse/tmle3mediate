@@ -1,8 +1,8 @@
 ################################################################################
 
-#' Factory function that returns an \code{[sl3]{sl3_Task}} generator function
-#' used in fitting the appropriate mediator derived conditional likelihood
-#' factor for NDE/NIE/medshift.
+#' Factory function that returns an \code{\link[sl3]{sl3_Task}} generator
+#' function used in fitting the appropriate mediator derived conditional
+#' likelihood factor for NDE/NIE/medshift.
 #'
 #' @param param_type A \code{character}, giving the target parameter type for
 #'   which to construct the psi_Z \code{[tmle3]{tmle3_Task}}.
