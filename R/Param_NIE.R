@@ -91,9 +91,6 @@ Param_NIE <- R6::R6Class(
       cf_likelihood_treatment <- self$cf_likelihood_treatment
       cf_likelihood_control <- self$cf_likelihood_control
 
-      # compute e(1|W,Z)
-      e_est <- likelihood$get_likelihood(tmle_task, "E", fold_number)
-
       # compute/extract g(1|W) and g(0|W)
       g_est <- likelihood$get_likelihood(tmle_task, "A", fold_number)
       g1_est <- likelihood$get_likelihood(treatment_task, "A", fold_number)
@@ -106,8 +103,14 @@ Param_NIE <- R6::R6Class(
       cf_pA_control <- cf_likelihood_control$get_likelihoods(
         tmle_task, "A", fold_number
       )
+
+      # compute e(1|W,Z) & e(0|W,Z)
+      e_est <- likelihood$get_likelihood(tmle_task, "E", fold_number)
+      e1_est <- cf_pA_treatment * e_est + cf_pA_control * (1 - e_est)
+      e0_est <- 1 - e1_est
+
       # clever covariates
-      HY <- (cf_pA_treatment / g1_est)  * (1 - ((1 - e_est) / e_est))
+      HY <- (cf_pA_treatment / g1_est)  * (1 - e0_est * g0_est / (e1_est * g1_est))
       HZ <- (2 * cf_pA_treatment - 1) / g_est
 
       # output clever covariates

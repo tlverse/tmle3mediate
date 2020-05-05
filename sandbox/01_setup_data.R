@@ -19,7 +19,7 @@ sim_data <- function(n_obs) {
     A <- rbinom(n_obs, 1, prob = dgp$g_mech(w = W))
 
     # generate mediators conditional on {A, W}
-    z_probs <- dgp$z_mech(a = A, w = W)
+    z_probs <- dgp$z_mech(w = W, a = A)
     Z <- lapply(z_probs, function(z_prob) {
       rbinom(n_obs, 1, z_prob)
     }) %>%
@@ -27,7 +27,7 @@ sim_data <- function(n_obs) {
     set_names(paste0("Z", seq_len(3)))
 
     ## generate outcome conditional on {Z, A, W}
-    Y <- dgp$m_mech(z = Z, a = A, w = W) + rnorm(length(A), mean = 0, sd = 0.5)
+    Y <- dgp$m_mech(w = W, a = A, z = Z) + rnorm(length(A), mean = 0, sd = 0.5)
 
     ## construct data for output
     dat <- as_tibble(cbind(W, A, Z, Y))

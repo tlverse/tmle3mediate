@@ -1,6 +1,9 @@
-# use custom package library on Savio cluster
+# be sure to set this env variable by `export R_LIBDIR=/path/to/your/R/libs`
+r_libdir <- Sys.getenv("R_LIBDIR")
+
+# set user-specific package library
 if (grepl("savio2", Sys.info()["nodename"])) {
-  .libPaths("/global/scratch/nhejazi/R")
+  .libPaths(r_libdir)
   Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 }
 
@@ -15,19 +18,19 @@ library(tidyverse)
 library(hal9001)
 library(origami)
 library(sl3)
-library(tml3e)
-library(tmle3mediate)
+library(tmle3)
+devtools::load_all(here())
 
 # load scripts, parallelization, PRNG
 source(here("01_setup_data.R"))
 source(here("02_fit_estimators.R"))
 registerDoFuture()
-plan(multiprocess, workers = 24)
+plan(multiprocess)
 
 # simulation parameters
 set.seed(7259)
-n_sim <- 500                                  # number of simulations
-n_obs <- cumsum(rep(sqrt(100), 5))^2          # sample sizes at root-n scale
+n_sim <- 500 # number of simulations
+n_obs <- (cumsum(rep(sqrt(100), 8))^2)[-1] # sample sizes at root-n scale
 
 # perform simulation across sample sizes
 sim_results <- lapply(n_obs, function(sample_size) {
