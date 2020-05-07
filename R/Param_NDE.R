@@ -16,7 +16,7 @@
 #' @format \code{\link{R6Class}} object.
 #'
 #' @section Constructor:
-#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+#'   \code{define_param(Param_NDE, observed_likelihood, ...,
 #'                      outcome_node)}
 #'
 #'   \describe{
@@ -74,6 +74,7 @@ Param_NDE <- R6::R6Class(
       cf_likelihood_control <- CF_Likelihood$new(
         observed_likelihood, control_lf
       )
+
       # store components
       private$.treatment_task <- treatment_task
       private$.control_task <- control_task
@@ -110,7 +111,7 @@ Param_NDE <- R6::R6Class(
       # clever covariates
       HY <- cf_pA_treatment * (e0_est / e1_est) * g0_est / g1_est^2 -
         cf_pA_control / g0_est
-      HZ <- cf_pA_control / g0_est
+      HZ <- 1 / g0_est
 
       # output clever covariates
       return(list(Y = HY, psi_Z = HZ))
@@ -122,14 +123,11 @@ Param_NDE <- R6::R6Class(
 
       # get observed likelihood
       likelihood <- self$observed_likelihood
-      cf_likelihood_treatment <- self$cf_likelihood_treatment
-      cf_likelihood_treatment <- self$cf_likelihood_control
       treatment_task <- self$treatment_task
       control_task <- self$control_task
 
       # extract various likelihood components
       y <- tmle_task$get_tmle_node(self$outcome_node)
-      a <- tmle_task$get_tmle_node("A")
       m_est <- likelihood$get_likelihood(tmle_task, "Y", fold_number)
 
       # Y estimates under treatment/control
@@ -159,7 +157,7 @@ Param_NDE <- R6::R6Class(
         fold_number
       )[["psi_Z"]]
 
-      # compute individual scores for DY, DA, DZW
+      # compute individual scores for DY, DA, DW
       D_Y <- HY * (y - m_est)
       D_Z <- HZ * (m1_est - m0_est - psi_Z_est)
       D_W <- psi_Z_est
@@ -193,7 +191,7 @@ Param_NDE <- R6::R6Class(
       return(private$.cf_likelihood_control)
     },
     update_nodes = function() {
-      return(c(self$outcome_node, names(self$intervention_list_treatment)))
+      return(c(self$outcome_node))
     }
   ),
   private = list(
