@@ -6,9 +6,10 @@ library(dplyr)
 library(hal9001)
 library(sl3)
 library(tmle3)
+library(here)
 
 # source in utils.R
-testthat::source_test_helpers()
+testthat::source_test_helpers(here("tests/testthat"))
 
 set.seed(7128816)
 
@@ -17,9 +18,6 @@ set.seed(7128816)
 ################################################################################
 
 # instantiate some learners
-mean_lrnr <- Lrnr_mean$new()
-fglm_contin_lrnr <- Lrnr_glm_fast$new()
-fglm_binary_lrnr <- Lrnr_glm_fast$new(family = binomial())
 hal_contin_lrnr <- Lrnr_hal9001$new(
   fit_type = "glmnet", n_folds = 5
 )
@@ -34,9 +32,7 @@ cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 # setup data and simulate to test with estimators
 
 # get data and column names for sl3 tasks (for convenience)
-data <- make_simulated_data()
-z_names <- colnames(data)[str_detect(colnames(data), "Z")]
-w_names <- colnames(data)[str_detect(colnames(data), "W")]
+data <- make_simulated_data(1000)
 
 # create node list and learner list
 node_list <- list(
@@ -56,6 +52,7 @@ learner_list <- list(
 tmle_spec_NIE <- tmle_NIE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
 )
 
 set.seed(71281)
@@ -86,6 +83,7 @@ tmle_fit_NIE <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
 tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
 )
 
 ## define data (from tmle3_Spec base class)
