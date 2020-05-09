@@ -125,6 +125,7 @@ Param_NDE <- R6::R6Class(
       likelihood <- self$observed_likelihood
       treatment_task <- self$treatment_task
       control_task <- self$control_task
+      cf_likelihood_control <- self$cf_likelihood_control
 
       # extract various likelihood components
       y <- tmle_task$get_tmle_node(self$outcome_node)
@@ -157,9 +158,13 @@ Param_NDE <- R6::R6Class(
         fold_number
       )[["psi_Z"]]
 
+      cf_pA_control <- cf_likelihood_control$get_likelihoods(
+        tmle_task, "A", fold_number
+      )
+
       # compute individual scores for DY, DA, DW
       D_Y <- HY * (y - m_est)
-      D_Z <- HZ * (m1_est - m0_est - psi_Z_est)
+      D_Z <- cf_pA_control * HZ * (m1_est - m0_est - psi_Z_est)
       D_W <- psi_Z_est
 
       # parameter and influence function
