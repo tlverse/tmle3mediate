@@ -96,21 +96,21 @@ Param_NDE <- R6::R6Class(
       g0_est <- likelihood$get_likelihood(control_task, "A", fold_number)
 
       # treatment/control indicators
-      cf_pA_treatment <- cf_likelihood_treatment$get_likelihoods(
+      treatment_indicator <- cf_likelihood_treatment$get_likelihoods(
         tmle_task, "A", fold_number
       )
-      cf_pA_control <- cf_likelihood_control$get_likelihoods(
+      control_indicator <- cf_likelihood_control$get_likelihoods(
         tmle_task, "A", fold_number
       )
 
       # compute e(1|W,Z) & e(0|W,Z)
       e_est <- likelihood$get_likelihood(tmle_task, "E", fold_number)
-      e1_est <- cf_pA_treatment * e_est + cf_pA_control * (1 - e_est)
+      e1_est <- treatment_indicator * e_est + control_indicator * (1 - e_est)
       e0_est <- 1 - e1_est
 
       # clever covariates
-      HY <- cf_pA_treatment * (e0_est / e1_est) * g0_est / g1_est^2 -
-        cf_pA_control / g0_est
+      HY <- treatment_indicator * (e0_est / e1_est) * g0_est / g1_est^2 -
+        control_indicator / g0_est
       HZ <- 1 / g0_est
 
       # output clever covariates
@@ -158,13 +158,13 @@ Param_NDE <- R6::R6Class(
         fold_number
       )[["psi_Z"]]
 
-      cf_pA_control <- cf_likelihood_control$get_likelihoods(
+      control_indicator <- cf_likelihood_control$get_likelihoods(
         tmle_task, "A", fold_number
       )
 
       # compute individual scores for DY, DA, DW
       D_Y <- HY * (y - m_est)
-      D_Z <- cf_pA_control * HZ * (m1_est - m0_est - psi_Z_est)
+      D_Z <- control_indicator * HZ * (m1_est - m0_est - psi_Z_est)
       D_W <- psi_Z_est
 
       # parameter and influence function
