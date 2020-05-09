@@ -29,7 +29,7 @@ plan(multiprocess)
 
 # simulation parameters
 set.seed(7259)
-n_sim <- 1 # number of simulations
+n_sim <- 24 # number of simulations
 n_obs <- (cumsum(rep(sqrt(100), 8))^2)[-1] # sample sizes at root-n scale
 
 # perform simulation across sample sizes
@@ -37,7 +37,7 @@ sim_results <- lapply(n_obs[1], function(sample_size) {
   # get results in parallel
   results <- foreach(this_iter = seq_len(n_sim),
                      .options.multicore = list(preschedule = FALSE),
-                     .errorhandling = "remove") %dorng% {
+                     .errorhandling = "remove") %do% {
     gc()
     data_sim <- sim_data(n_obs = sample_size)
     est_out <- fit_estimators(data = data_sim)

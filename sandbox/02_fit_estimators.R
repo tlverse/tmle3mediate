@@ -13,14 +13,14 @@ est_nde_nie <- function(data, m_learners, g_learners, e_learners,
   tmle_spec_NIE <- tmle_NIE(
     e_learners = e_learners,
     psi_Z_learners = psi_Z_learners,
-    max_iter = 50
+    max_iter = 100
   )
   NIE_est <- tmle3(tmle_spec_NIE, data, node_list, learner_list)
 
   tmle_spec_NDE <- tmle_NDE(
     e_learners = e_learners,
     psi_Z_learners = psi_Z_learners,
-    max_iter = 50
+    max_iter = 100
   )
   NDE_est <- tmle3(tmle_spec_NDE, data, node_list, learner_list)
 
@@ -35,6 +35,7 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   # misspecified learner
   mean_lrnr <- Lrnr_cv$new(Lrnr_mean$new(), full_fit = TRUE)
+  fglm_lrnr <- Lrnr_cv$new(Lrnr_glm_fast$new(), full_fit = TRUE)
 
   # hal9001
   hal_contin_lrnr <- Lrnr_hal9001$new(n_folds = cv_folds,
@@ -81,10 +82,10 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   mis_m <- est_nde_nie(
     data,
-    m_learners = mean_lrnr,
+    m_learners = fglm_lrnr,
     g_learners = cv_hal_binary_lrnr,
     e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = mean_lrnr
+    psi_Z_learners = fglm_lrnr
   )
 
   ###################################################################
