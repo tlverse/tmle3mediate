@@ -16,7 +16,7 @@
 #' @format \code{\link{R6Class}} object.
 #'
 #' @section Constructor:
-#'   \code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+#'   \code{define_param(Param_NIE, observed_likelihood, ...,
 #'                      outcome_node)}
 #'
 #'   \describe{
@@ -74,6 +74,7 @@ Param_NIE <- R6::R6Class(
       cf_likelihood_control <- CF_Likelihood$new(
         observed_likelihood, control_lf
       )
+
       # store components
       private$.treatment_task <- treatment_task
       private$.control_task <- control_task
@@ -84,12 +85,14 @@ Param_NIE <- R6::R6Class(
       if (is.null(tmle_task)) {
         tmle_task <- self$observed_likelihood$training_task
       }
-
       likelihood <- self$observed_likelihood
       treatment_task <- self$treatment_task
       control_task <- self$control_task
       cf_likelihood_treatment <- self$cf_likelihood_treatment
       cf_likelihood_control <- self$cf_likelihood_control
+
+      # extract observed treatment
+      a <- tmle_task$get_tmle_node("A")
 
       # compute/extract g(1|W) and g(0|W)
       g_est <- likelihood$get_likelihood(tmle_task, "A", fold_number)
@@ -111,10 +114,10 @@ Param_NIE <- R6::R6Class(
 
       # clever covariates
       HY <- (cf_pA_treatment / g1_est)  * (1 - e0_est * g0_est / (e1_est * g1_est))
-      HZ <- (2 * cf_pA_treatment - 1) / g_est
+      HZ <- (2 * a - 1) / g_est
 
       # output clever covariates
-      return(list(Y = HY, Z = HZ))
+      return(list(Y = HY, psi_Z = HZ))
     },
     estimates = function(tmle_task = NULL, fold_number = "full") {
       if (is.null(tmle_task)) {
@@ -123,14 +126,11 @@ Param_NIE <- R6::R6Class(
 
       # get observed likelihood
       likelihood <- self$observed_likelihood
-      cf_likelihood_treatment <- self$cf_likelihood_treatment
-      cf_likelihood_treatment <- self$cf_likelihood_control
       treatment_task <- self$treatment_task
       control_task <- self$control_task
 
       # extract various likelihood components
       y <- tmle_task$get_tmle_node(self$outcome_node)
-      a <- tmle_task$get_tmle_node("A")
       m_est <- likelihood$get_likelihood(tmle_task, "Y", fold_number)
 
       # Y estimates under treatment/control
@@ -162,9 +162,9 @@ Param_NIE <- R6::R6Class(
       HZ <- self$clever_covariates(
         tmle_task,
         fold_number
-      )[["Z"]]
+      )[["psi_Z"]]
 
-      # compute individual scores for DY, DA, DZW
+      # compute individual scores for DY, DA, DW
       D_Y <- HY * (y - m_est)
       D_Z <- HZ * (m1_est - psi_Z_est)
       D_W <- psi_Z_est
@@ -198,7 +198,7 @@ Param_NIE <- R6::R6Class(
       return(private$.cf_likelihood_control)
     },
     update_nodes = function() {
-      return(c(self$outcome_node, names(self$intervention_list_treatment)))
+      return(c(self$outcome_node))
     }
   ),
   private = list(

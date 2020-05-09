@@ -34,6 +34,7 @@ mediator_task_fun_factory <- function(param_type = c("NDE", "NIE", "medshift"),
         uuid = uuid::UUIDgenerate(),
         new_data = data.table::data.table(A = 1)
       )
+
     # create counterfactual outcomes and construct pseudo-outcome
     m_pseudo <- likelihood$get_likelihood(treatment_task, "Y")
 

@@ -47,19 +47,17 @@ tmle3_Spec_NIE <- R6::R6Class(
         tmle3::LF_derived, "E", self$options$e_learners,
         targeted_likelihood, make_e_task
       )
-
       lf_psi_Z0 <- tmle3::define_lf(
         tmle3::LF_derived, "psi_Z0", self$options$psi_Z_learners,
         targeted_likelihood, make_NIE_psi_Z0_task
       )
-
       lf_psi_Z1 <- tmle3::define_lf(
         tmle3::LF_derived, "psi_Z1", self$options$psi_Z_learners,
         targeted_likelihood, make_NIE_psi_Z1_task
       )
-      targeted_likelihood$add_factors(lf_e)
-      targeted_likelihood$add_factors(lf_psi_Z0)
-      targeted_likelihood$add_factors(lf_psi_Z1)
+      targeted_likelihood$add_factors(
+        list(lf_e, lf_psi_Z0, lf_psi_Z1)
+      )
 
       # create param
       tmle_params <- Param_NIE$new(targeted_likelihood)
@@ -132,8 +130,8 @@ tmle_NIE <- function(e_learners, psi_Z_learners,
 #' @importFrom data.table as.data.table data.table setnames
 #' @importFrom uuid UUIDgenerate
 #' @importFrom sl3 sl3_Task
-#'
-#' @name make_NIE_psi_task
+
+#' @name make_NIE_psi_Z_task
 #'
 #' @keywords internal
 make_NIE_psi_Z0_task <- function(tmle_task, likelihood) {
@@ -142,7 +140,7 @@ make_NIE_psi_Z0_task <- function(tmle_task, likelihood) {
   )
 }
 
-#' @rdname make_NIE_psi_task
+#' @rdname make_NIE_psi_Z_task
 #'
 #' @keywords internal
 make_NIE_psi_Z1_task <- function(tmle_task, likelihood) {

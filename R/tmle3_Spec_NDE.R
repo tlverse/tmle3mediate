@@ -51,8 +51,7 @@ tmle3_Spec_NDE <- R6::R6Class(
         tmle3::LF_derived, "psi_Z", self$options$psi_Z_learners,
         targeted_likelihood, make_NDE_psi_Z_task
       )
-      targeted_likelihood$add_factors(lf_e)
-      targeted_likelihood$add_factors(lf_psi_Z)
+      targeted_likelihood$add_factors(list(lf_e, lf_psi_Z))
 
       # create param
       tmle_params <- Param_NDE$new(targeted_likelihood)
@@ -126,7 +125,7 @@ tmle_NDE <- function(e_learners, psi_Z_learners,
 #' @importFrom uuid UUIDgenerate
 #' @importFrom sl3 sl3_Task
 #'
-#' @name make_NDE_psi_task
+#' @name make_NDE_psi_Z_task
 #'
 #' @keywords internal
 make_NDE_psi_Z_task <- function(tmle_task, likelihood) {
