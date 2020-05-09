@@ -29,7 +29,7 @@ plan(multiprocess)
 
 # simulation parameters
 set.seed(7259)
-n_sim <- 24 # number of simulations
+n_sim <- 500 # number of simulations
 n_obs <- (cumsum(rep(sqrt(100), 8))^2)[-1] # sample sizes at root-n scale
 
 # perform simulation across sample sizes
