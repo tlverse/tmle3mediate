@@ -28,15 +28,20 @@ make_dgp <- function() {
   return(list(g_mech = g_mech, z_mech = z_mech, m_mech = m_mech))
 }
 
-make_simulated_data <- function(n_obs = 10000) { # no. observations
-  # get data generating process functions
-  dgp <- make_dgp()
-
+make_simulated_W <- function(n_obs = 10000) {
   # baseline covariate -- simple, binary
   W_1 <- rbinom(n_obs, 1, prob = 0.50)
   W_2 <- rbinom(n_obs, 1, prob = 0.65)
   W_3 <- rbinom(n_obs, 1, prob = 0.35)
   W <- cbind(W_1, W_2, W_3)
+  return(W)
+}
+
+make_simulated_data <- function(n_obs = 10000) { # no. observations
+  # get data generating process functions
+  dgp <- make_dgp()
+
+  W <- make_simulated_W(n_obs)
 
   # get probabilities of treatment
   g_mech <- dgp$g_mech(W)

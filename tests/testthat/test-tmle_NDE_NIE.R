@@ -125,69 +125,13 @@ test_that(
 )
 
 ################################################################################
-get_sim_truth_NIE_NDE <- function(n_obs = 1e7) { # number of observations
-  # compute large data set for true values
-  data <- make_simulated_data(
-    n_obs = n_obs
-  )
-  w_names <- str_subset(colnames(data), "W")
-  z_names <- str_subset(colnames(data), "Z")
-  W <- data[, ..w_names]
-  Z <- data[, ..z_names]
-
-  dgp <- make_dgp()
-  Z_1_probs <- dgp$z_mech(W, 1)
-  Z_0_probs <- dgp$z_mech(W, 0)
-
-  # Z1 counterfactuals
-  Z1_1 <- rbinom(n_obs, 1, prob = Z_1_probs[[1]])
-  Z1_0 <- rbinom(n_obs, 1, prob = Z_0_probs[[1]])
-
-  # Z2 counterfactuals
-  Z2_1 <- rbinom(n_obs, 1, prob = Z_1_probs[[2]])
-  Z2_0 <- rbinom(n_obs, 1, prob = Z_0_probs[[2]])
-
-  # Z3 counterfactuals
-  Z3_1 <- rbinom(n_obs, 1, prob = Z_1_probs[[3]])
-  Z3_0 <- rbinom(n_obs, 1, prob = Z_0_probs[[3]])
-
-  Z1 <- cbind(Z1_1, Z2_1, Z3_1)
-  Z0 <- cbind(Z1_0, Z2_0, Z3_0)
-
-  # compute Y counterfactuals
-  # Y(1, 1)
-  EY_A1_Z1 <- dgp$m_mech(W, 1, Z1, eps_sd = 0)
-  # Y(0, 0)
-  EY_A0_Z0 <- dgp$m_mech(W, 0, Z0, eps_sd = 0)
-  # Y(1, 0)
-  EY_A1_Z0 <- dgp$m_mech(W, 1, Z0, eps_sd = 0)
-  # Y(0, 1)
-  EY_A0_Z1 <- dgp$m_mech(W, 0, Z1, eps_sd = 0)
-
-  # compute TRUE M under counterfactual regimes
-  m_Ais1 <- dgp$m_mech(W, 1, Z, eps_sd = 0)
-  m_Ais0 <- dgp$m_mech(W, 0, Z, eps_sd = 0)
-
-  # output: true values of nuisance parameters
-  return(list(
-    EY_A1_Z1 = EY_A1_Z1,
-    EY_A1_Z0 = EY_A1_Z0,
-    EY_A0_Z1 = EY_A0_Z1,
-    EY_A0_Z0 = EY_A0_Z0
-  ))
-}
+## compare estimates to the truth
 
 # simulate data and extract components for computing true parameter value
 sim_truth <- get_sim_truth_NIE_NDE()
 
-EY_A1_Z1 <- sim_truth$EY_A1_Z1
-EY_A1_Z0 <- sim_truth$EY_A1_Z0
-EY_A0_Z1 <- sim_truth$EY_A0_Z1
-EY_A0_Z0 <- sim_truth$EY_A0_Z0
-
-# compute true NIE via empirical substitution estimator
-psi_NDE_true <- mean(EY_A1_Z0 - EY_A0_Z0)
-psi_NIE_true <- mean(EY_A1_Z1 - EY_A1_Z0)
+psi_NDE_true <- sim_truth$NDE
+psi_NIE_true <- sim_truth$NIE
 
 test_that("TMLE estimate of NIE for the simulation matches true value",
   expect_equal(tmle_fit_NIE$summary$tmle_est,
