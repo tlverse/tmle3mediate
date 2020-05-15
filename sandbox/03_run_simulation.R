@@ -22,14 +22,14 @@ library(tmle3)
 devtools::load_all(here())
 
 # load scripts, parallelization, PRNG
-source(here("01_setup_data.R"))
-source(here("02_fit_estimators.R"))
+source(here("sandbox/01_setup_data.R"))
+source(here("sandbox/02_fit_estimators.R"))
 registerDoFuture()
 plan(multiprocess)
 
 # simulation parameters
 set.seed(7259)
-n_sim <- 500 # number of simulations
+n_sim <- 1 # number of simulations
 n_obs <- (cumsum(rep(sqrt(100), 8))^2)[-1] # sample sizes at root-n scale
 
 # perform simulation across sample sizes
@@ -37,9 +37,9 @@ sim_results <- lapply(n_obs[1], function(sample_size) {
   # get results in parallel
   results <- foreach(this_iter = seq_len(n_sim),
                      .options.multicore = list(preschedule = FALSE),
-                     .errorhandling = "remove") %do% {
+                     .errorhandling = "remove") %dorng% {
     gc()
-    data_sim <- sim_data(n_obs = sample_size)
+    data_sim <- make_simulated_data(n_obs = sample_size)
     est_out <- fit_estimators(data = data_sim)
     return(est_out)
   }
@@ -52,4 +52,4 @@ sim_results <- lapply(n_obs[1], function(sample_size) {
 names(sim_results) <- paste("n", n_obs, sep = "_")
 timestamp <- str_replace_all(Sys.time(), " ", "_")
 saveRDS(object = sim_results,
-        file = here("data", paste0("tmle3mediate_", timestamp, ".rds")))
+        file = here("sandbox/data", paste0("tmle3mediate_", timestamp, ".rds")))
