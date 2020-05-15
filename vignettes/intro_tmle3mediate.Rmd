@@ -34,6 +34,9 @@ library(tmle3)
 devtools::load_all('/Users/davidmccoy/Documents/PhD/BBD_capstone/tmle3mediate')
 library(mma)
 `%notin%` <- Negate(`%in%`)
+library(here)
+source(here("sandbox/01_setup_data.R"))
+
 
 set.seed(429153)
 
@@ -117,12 +120,6 @@ hal_lrnr <- Lrnr_hal9001$new(max_degree = NULL,
                              nlambda = 500,
                              yolo = FALSE)
 
-mean_lrnr <- Lrnr_mean$new()
-fglm_contin_lrnr <- Lrnr_glm_fast$new()
-fglm_binary_lrnr <- Lrnr_glm_fast$new(family = binomial())
-
-xgboost_learner <- Lrnr_xgboost$new()
-
 hal_contin_lrnr <- Lrnr_hal9001$new(
   fit_type = "glmnet", n_folds = 5
 )
@@ -134,13 +131,10 @@ hal_binary_lrnr <- Lrnr_hal9001$new(
 cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
 cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 
-# set nuisance regression learners based on ID's successful simulations
-sl <- Lrnr_sl$new(learners = list(hal_lrnr),
-                  metalearner = Lrnr_nnls$new())
 
 learner_list <- list(
-  Y = fglm_contin_lrnr,
-  A = fglm_binary_lrnr
+  Y = cv_hal_contin_lrnr,
+  A = cv_hal_binary_lrnr
 )
 
 ```
@@ -215,8 +209,9 @@ We then provide tmle3 with our spec object, the data, the node list we created a
 
 ```{r NIE,message=FALSE, warning=FALSE}
 tmle_spec_NIE <- tmle_NIE(
-  e_learners = fglm_binary_lrnr,
-  psi_Z_learners = fglm_contin_lrnr
+  e_learners = cv_hal_binary_lrnr,
+  psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
 )
 
 weight_behavior_NIE <- tmle3(tmle_spec_NIE, weight_behavior_complete, node_list, learner_list)
@@ -235,8 +230,9 @@ The same procedure is done to get the natural direct effect but we use the tmle_
 ```{r NDE, message=FALSE, warning=FALSE}
 
 tmle_spec_NDE <- tmle_NDE(
-  e_learners = fglm_binary_lrnr,
-  psi_Z_learners = fglm_contin_lrnr
+  e_learners = cv_hal_binary_lrnr,
+  psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
 )
 
 weight_behavior_NDE <- tmle3(tmle_spec_NDE, weight_behavior_complete, node_list, learner_list)
@@ -245,6 +241,126 @@ weight_behavior_NDE <- weight_behavior_NDE$summary
 print(weight_behavior_NDE)
 
 ```
+
+Let's check out what MMA looks like for this sports behavior -> BMI data set as mediated by these same three covariates: 
+
+```{r mma_weight_mediation, message=FALSE, warning=FALSE}
+x=weight_behavior_complete[,c(2:11,13:15)]
+pred=weight_behavior_complete[,12]
+y=data.frame(weight_behavior_complete[,1])
+colnames(y)="bmi"
+
+
+mma_glm_weight<-mma(x,
+             y,
+             pred=pred,
+             mediator=c(7,11,13),
+             jointm=list(n=1,j1=c(7,11,13)),
+             predref=0,
+             alpha=0.4,
+             alpha2=0.4,
+             n2=20,
+             nonlinear=FALSE)
+
+print(mma_glm_weight)
+
+mma_mart_weight <-mma(x,
+              y,
+              pred=pred,
+              mediator=c(7,11,13),
+              jointm=list(n=1,j1=c(7,11,13)),
+              predref=0,
+              alpha=0.4,
+              alpha2=0.4,
+              n =2,
+              n2=1,
+              nonlinear=TRUE)
+
+print(mma_mart_weight)
+
+
+```
+
+Now let's generate some simulated data where we know the truth and compare our results using tmle3mediate to the mma package where we got the previous data from: 
+
+```{r gen_data}
+data_sim <- sim_data(n_obs = 2000)
+head(data_sim)
+```
+
+ 
+```{r fit_tmle3mediate_sim}
+
+node_list <- list(
+  W = c("W1", "W2", "W3"),
+  A = "A",
+  Z = c("Z1", "Z2", "Z3"),
+  Y = "Y"
+)
+
+learner_list <- list(
+  Y = cv_hal_contin_lrnr,
+  A = cv_hal_binary_lrnr
+)
+tmle_spec_NIE <- tmle_NIE(
+  e_learners = cv_hal_binary_lrnr,
+  psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
+)
+NIE_est <- tmle3(tmle_spec_NIE, data_sim, node_list, learner_list)
+
+tmle_spec_NDE <- tmle_NDE(
+  e_learners = cv_hal_binary_lrnr,
+  psi_Z_learners = cv_hal_contin_lrnr,
+  max_iter = 100
+)
+NDE_est <- tmle3(tmle_spec_NDE, data_sim, node_list, learner_list)
+```
+
+Let's use mma to find the NDE and NIE on the same simulated data: 
+
+```{r mma, message=FALSE, warning=FALSE}
+
+x=data.frame(data_sim[,c(1:3,5:7)])
+pred=data.frame(data_sim[,4])
+y=data.frame(data_sim[,8])
+colnames(y)="Y"
+
+mma_glm<-mma(x,
+             y,
+             pred=pred,
+             mediator=c(4:6),
+             jointm=list(n=1,j1=c(4:6)),
+             predref=0,
+             alpha=0.4,
+             alpha2=0.4,
+             n2=20,
+             nonlinear=FALSE)
+
+print(mma_glm)
+
+
+mma_mart<-mma(x,
+             y,
+             pred=pred,
+             mediator=c(4:6),
+             jointm=list(n=1,j1=c(4:6)),
+             predref=0,
+             alpha=0.4,
+             alpha2=0.4,
+             n2=1,
+             nonlinear=TRUE)
+
+print(mma_glm)
+
+
+
+
+```
+
+
+
+
 
 
 ## References
