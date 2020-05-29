@@ -5,8 +5,10 @@ library(stringr)
 library(hal9001)
 library(sl3)
 library(tmle3)
-library(medshift)
+library(devtools)
 set.seed(7128816)
+
+# delta used for stochastic intervention
 delta_ipsi <- 0.5
 
 # source in utils.R
@@ -35,7 +37,7 @@ cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 ################################################################################
 
 # get data and column names for sl3 tasks (for convenience)
-data <- make_simulated_data()
+data <- make_simulated_data(n_obs = 10000, binary_outcome = FALSE)
 z_names <- colnames(data)[str_detect(colnames(data), "Z")]
 w_names <- colnames(data)[str_detect(colnames(data), "W")]
 
@@ -80,21 +82,7 @@ set.seed(71281)
 tmle_fit <- tmle3(tmle_spec, data, node_list, learner_list)
 tmle_fit
 
-# fit one-step estimator
-set.seed(71281)
-os_fit <- medshift(
-  W = data[, ..w_names], A = data$A, Z = data[, ..z_names], Y = data$Y,
-  delta = delta_ipsi,
-  g_learners = hal_binary_lrnr,
-  e_learners = hal_binary_lrnr,
-  m_learners = hal_contin_lrnr,
-  phi_learners = hal_contin_lrnr,
-  estimator = "onestep",
-)
-summary(os_fit)
 
-#test_that("TML estimate matches the one-step estimate closely enough", {
-#})
 
 ################################################################################
 get_sim_truth_medshift <- function(n_obs = 1e7, # number of observations
@@ -102,8 +90,10 @@ get_sim_truth_medshift <- function(n_obs = 1e7, # number of observations
 
   # compute large data set for true values
   data <- make_simulated_data(
-    n_obs = n_obs
+    n_obs = n_obs,
+    binary_outcome = FALSE
   )
+
   w_names <- str_subset(colnames(data), "W")
   z_names <- str_subset(colnames(data), "Z")
   W <- data[, ..w_names]
@@ -121,8 +111,8 @@ get_sim_truth_medshift <- function(n_obs = 1e7, # number of observations
   g_shifted_Ais0 <- 1 - g_shifted_Ais1
 
   # compute TRUE M under counterfactual regimes
-  m_Ais1 <- dgp$m_mech(W, 1, Z, eps_sd = 0)
-  m_Ais0 <- dgp$m_mech(W, 0, Z, eps_sd = 0)
+  m_Ais1 <- dgp$m_mech_cont(W, 1, Z, eps_sd = 0)
+  m_Ais0 <- dgp$m_mech_cont(W, 0, Z, eps_sd = 0)
 
   # output: true values of nuisance parameters
   return(list(
@@ -156,6 +146,7 @@ true_param <- mean(m_A1 * g_shifted_A1) + mean(m_A0 * g_shifted_A0)
 test_that(
   "TMLE estimate of medshift param for the simulation matches true value",
   expect_equal(tmle_fit$summary$tmle_est,
-               true_param,
-               tolerance = tmle_fit$summary$se)
+    true_param,
+    tolerance = tmle_fit$summary$se
+  )
 )

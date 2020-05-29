@@ -66,9 +66,5 @@ Iván and Hejazi, Nima S (2020). Journal of the Royal Statistical
 Society, Series B. \url{https://doi.org/10.1111/rssb.12362}}
 }
 }
-\seealso{
-Other Likelihood objects: 
-\code{\link{LF_psi_Z}}
-}
 \concept{Likelihood objects}
 \keyword{data}

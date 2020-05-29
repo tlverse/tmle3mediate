@@ -5,11 +5,18 @@ library(ggpubr)
 if (TRUE) {
   source(here("tests/testthat/helper-dgp.R"))
   source(here("tests/testthat/helper-NDE_NIE.R"))
-  sim_truth <- get_sim_truth_NIE_NDE(n_obs = 1e7, EIC = TRUE)
-  saveRDS(sim_truth, here("sandbox/data/sim_truth.rds"))
+  sim_truth_binary_y <- get_sim_truth_NIE_NDE(n_obs = 1e7, binary_outcome = TRUE, EIC = TRUE)
+  sim_truth_cont_y <- get_sim_truth_NIE_NDE(n_obs = 1e7, binary_outcome = FALSE, EIC = TRUE)
+
+  saveRDS(sim_truth_binary_y, here("sandbox/data/sim_truth_binary_y.rds"))
+  saveRDS(sim_truth_cont_y, here("sandbox/data/sim_truth_cont_y.rds"))
 } else {
-  sim_truth <- readRDS(here("sandbox/data/sim_truth.rds"))
+  sim_truth_binary_y <- readRDS(here("sandbox/data/sim_truth_binary_y.rds"))
+  sim_truth_cont_y <- readRDS(here("sandbox/data/sim_truth_cont_y.rds"))
 }
+
+##set sim truth here for binary or continuous plotting, calcs
+sim_truth <- sim_truth_cont_y
 
 EY_A1_Z1 <- sim_truth$EY_A1_Z1
 EY_A1_Z0 <- sim_truth$EY_A1_Z0
@@ -60,9 +67,8 @@ rename_sim_types <- function(sym_types) {
 sim_statistics <- sim_results %>%
   mutate(
     covers = ifelse(
-      type == "NDE",
-      lower <= psi_NDE_true & psi_NDE_true <= upper,
-      lower <= psi_NIE_true & psi_NIE_true <= upper
+      (lower <= psi_NDE_true & psi_NDE_true <= upper) |
+      (lower <= psi_NIE_true & psi_NIE_true <= upper), 1,0
     )
   ) %>%
   group_by(n_obs, type, sim_type) %>%
