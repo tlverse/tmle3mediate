@@ -3,7 +3,9 @@
 \name{LF_ipsi}
 \alias{LF_ipsi}
 \title{Likelihood Factor for Incremental Propensity Score Interventions}
-\format{\code{\link[R6]{R6Class}} object.}
+\format{
+\code{\link[R6]{R6Class}} object.
+}
 \value{
 \code{\link[tmle3]{LF_base}} object.
 }

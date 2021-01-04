@@ -3,7 +3,9 @@
 \name{Param_NIE}
 \alias{Param_NIE}
 \title{Parameter for the natural indirect effect}
-\format{\code{\link{R6Class}} object.}
+\format{
+\code{\link{R6Class}} object.
+}
 \value{
 \code{Param_base} object
 }
@@ -13,7 +15,7 @@ Parameter definition class. See
 }
 \section{Constructor}{
 
-\code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+\code{define_param(Param_NIE, observed_likelihood, ...,
                      outcome_node)}
 
 \describe{

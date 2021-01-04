@@ -3,7 +3,9 @@
 \name{Param_NDE}
 \alias{Param_NDE}
 \title{Parameter for the natural direct effect}
-\format{\code{\link{R6Class}} object.}
+\format{
+\code{\link{R6Class}} object.
+}
 \value{
 \code{Param_base} object
 }
@@ -13,7 +15,7 @@ Parameter definition class. See
 }
 \section{Constructor}{
 
-\code{define_param(Param_ATT, observed_likelihood, intervention_list, ...,
+\code{define_param(Param_NDE, observed_likelihood, ...,
                      outcome_node)}
 
 \describe{

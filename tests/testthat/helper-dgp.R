@@ -15,8 +15,8 @@ make_dgp <- function() {
     return(list(z1_prob, z2_prob, z3_prob))
   }
 
-  # outcome mechanism
-  m_mech <- function(w, a, z, eps_sd = 0.5) {
+  # outcome mechanism for continuous
+  m_mech_cont <- function(w, a, z, eps_sd = 0.5) {
     w <- data.frame(w)
     z <- data.frame(z)
     y <- z[,1]^2 + z[,2]^2 - z[,3] + exp(a + z[,3] / (1 + rowSums(w)^2)) +
@@ -24,19 +24,34 @@ make_dgp <- function() {
     return(y)
   }
 
+  # outcome mechanism for binary
+  m_mech_binary <- function(w, a, z_probs, eps_sd = 0.5) {
+    w <- data.frame(w)
+    z_probs <- data.frame(z_probs)
+    y_probs <- plogis(z_probs[,1]^2 + z_probs[,2]^2 - z_probs[,3] + exp(a + z_probs[,3] / (1 + rowSums(w)^2)) +
+      rnorm(length(a), mean = 0, sd = eps_sd))
+    return(y_probs)
+  }
+
+
   # return DGP functions
-  return(list(g_mech = g_mech, z_mech = z_mech, m_mech = m_mech))
+  return(list(g_mech = g_mech, z_mech = z_mech, m_mech_cont = m_mech_cont, m_mech_binary = m_mech_binary))
 }
 
-make_simulated_data <- function(n_obs = 10000) { # no. observations
-  # get data generating process functions
-  dgp <- make_dgp()
-
+make_simulated_W <- function(n_obs = 10000) {
   # baseline covariate -- simple, binary
   W_1 <- rbinom(n_obs, 1, prob = 0.50)
   W_2 <- rbinom(n_obs, 1, prob = 0.65)
   W_3 <- rbinom(n_obs, 1, prob = 0.35)
   W <- cbind(W_1, W_2, W_3)
+  return(W)
+}
+
+make_simulated_data <- function(n_obs = 10000, binary_outcome = FALSE) { # no. observations
+  # get data generating process functions
+  dgp <- make_dgp()
+
+  W <- make_simulated_W(n_obs)
 
   # get probabilities of treatment
   g_mech <- dgp$g_mech(W)
@@ -57,7 +72,15 @@ make_simulated_data <- function(n_obs = 10000) { # no. observations
   Z <- cbind(Z_1, Z_2, Z_3)
 
   # create outcome as a function of A, Z, W + white noise
-  Y <- dgp$m_mech(W, A, Z, eps_sd = 0.5)
+  # if y needs to be binary
+  if (binary_outcome) {
+    y_probs <- dgp$m_mech_binary(W, A, z_probs = cbind(z_mech[[1]], z_mech[[2]], z_mech[[3]]), eps_sd = 0.5)
+    Y <- rbinom(n_obs, 1, prob = y_probs)
+
+  } else {
+    Y <- dgp$m_mech_cont(W, A, Z, eps_sd = 0.5)
+    Y_test <- dgp$m_mech_cont(W, A, z_mech, eps_sd = 0.5)
+  }
 
   # full data structure
   data <- as.data.table(cbind(Y, Z, A, W))

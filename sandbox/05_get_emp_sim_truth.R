@@ -1,18 +1,22 @@
-library(here)
-library(tidyverse)
-source(here("dgp_funs.R"))
-source(here("01_setup_data.R"))
+# load scripts, parallelization, PRNG
+source(here("sandbox/01_setup_data.R"))
+source(here("sandbox/02_fit_estimators.R"))
+source(here("/tests/testthat/helper-dgp.R"))
 
-get_truth <- function(n_obs = 1e7) { # number of observations
+timestamp <- '2020-04-20_16:57:52'
+sample_size <- 2000
+data_sim <- sim_data(n_obs = sample_size)
+
+################################################################################
+get_sim_truth_NIE_NDE <- function(data = data_sim) { # number of observations
   # compute large data set for true values
+
+  w_names <- str_subset(colnames(data), "W")
+  z_names <- str_subset(colnames(data), "Z")
+  W <- data[, w_names]
+  Z <- data[, z_names]
+
   dgp <- make_dgp()
-  data_truth <- sim_data(n_obs)
-
-  w_names <- str_subset(colnames(data_truth), "W")
-  z_names <- str_subset(colnames(data_truth), "Z")
-  W <- data_truth[, w_names]
-  Z <- data_truth[, z_names]
-
   Z_1_probs <- dgp$z_mech(W, 1)
   Z_0_probs <- dgp$z_mech(W, 0)
 
@@ -53,3 +57,23 @@ get_truth <- function(n_obs = 1e7) { # number of observations
     EY_A0_Z0 = EY_A0_Z0
   ))
 }
+
+# simulate data and extract components for computing true parameter value
+sim_truth <- get_sim_truth_NIE_NDE()
+
+EY_A1_Z1 <- sim_truth$EY_A1_Z1
+EY_A1_Z0 <- sim_truth$EY_A1_Z0
+EY_A0_Z1 <- sim_truth$EY_A0_Z1
+EY_A0_Z0 <- sim_truth$EY_A0_Z0
+
+# compute true NIE via empirical substitution estimator
+psi_NDE_true <- mean(EY_A1_Z0 - EY_A0_Z0)
+psi_NIE_true <- mean(EY_A1_Z1 - EY_A1_Z0)
+
+# load simulated data
+
+sim_results <- readRDS(file = here("data", paste0("tmle3mediate_", timestamp, ".rds")))
+
+
+
+

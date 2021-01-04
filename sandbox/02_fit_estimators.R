@@ -1,9 +1,9 @@
 est_nde_nie <- function(data, m_learners, g_learners, e_learners,
                         psi_Z_learners) {
   node_list <- list(
-    W = c("W1", "W2", "W3"),
+    W = c("W_1", "W_2", "W_3"),
     A = "A",
-    Z = c("Z1", "Z2", "Z3"),
+    Z = c("Z_1", "Z_2", "Z_3"),
     Y = "Y"
   )
   learner_list <- list(
@@ -48,11 +48,6 @@ fit_estimators <- function(data, cv_folds = 5) {
   cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
   cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 
-  # TODO: check misspecification in Wenjing's paper again
-  # TODO: check three robustness conditions in sim
-  # TODO: sometimes have to force hal learners to go deep enough into sequence of lambdas
-  #       using binomial family, glmnet ignores the lambda.min.ratio argument
-
   # compute TMLE under different misspecification settings
   ## 1) all nuisance functions correctly specified
 
@@ -64,9 +59,49 @@ fit_estimators <- function(data, cv_folds = 5) {
     psi_Z_learners = cv_hal_contin_lrnr
   )
 
+  ###################################################################
+
+  ## 2) g and e misspecified
+  ## Lemma 1. (i) of 2012 Zheng and van der Laan satisfied
+
+  mis_i <- est_nde_nie(
+    data,
+    m_learners = cv_hal_contin_lrnr,
+    g_learners = mean_lrnr,
+    e_learners = mean_lrnr,
+    psi_Z_learners = cv_hal_contin_lrnr
+  )
+
   ##############################################################
 
-  ## 2) e misspecified
+  ## 3) e and psi_Z misspecified
+  ## Lemma 1. (ii) of 2012 Zheng and van der Laan satisfied
+
+  mis_ii <- est_nde_nie(
+    data,
+    m_learners = cv_hal_contin_lrnr,
+    g_learners = cv_hal_contin_lrnr,
+    e_learners = mean_lrnr,
+    psi_Z_learners = mean_lrnr
+  )
+
+  ###################################################################
+
+  ## 4) m and psi_Z misspecified
+  ## Lemma 1. (iii) of 2012 Zheng and van der Laan satisfied
+
+  mis_iii <- est_nde_nie(
+    data,
+    m_learners = fglm_lrnr,
+    g_learners = cv_hal_binary_lrnr,
+    e_learners = cv_hal_binary_lrnr,
+    psi_Z_learners = mean_lrnr
+  )
+
+  ###################################################################
+
+  ## 5) e misspecified
+  ## Lemma 1. (i) and (ii) of 2012 Zheng and van der Laan satisfied
 
   mis_e <- est_nde_nie(
     data,
@@ -78,24 +113,39 @@ fit_estimators <- function(data, cv_folds = 5) {
 
   ###################################################################
 
-  ## 3) m misspecified
-
-  mis_m <- est_nde_nie(
-    data,
-    m_learners = fglm_lrnr,
-    g_learners = cv_hal_binary_lrnr,
-    e_learners = cv_hal_binary_lrnr,
-    psi_Z_learners = fglm_lrnr
-  )
-
-  ###################################################################
-
-  ## 4) g misspecified
+  ## 6) g misspecified
+  ## Lemma 1. (i) of 2012 Zheng and van der Laan satisfied
 
   mis_g <- est_nde_nie(
     data,
     m_learners = cv_hal_contin_lrnr,
     g_learners = mean_lrnr,
+    e_learners = cv_hal_binary_lrnr,
+    psi_Z_learners = cv_hal_contin_lrnr
+  )
+
+  ###################################################################
+
+  ## 7) psi_Z misspecified
+  ## Lemma 1. (ii) and (iii) of 2012 Zheng and van der Laan satisfied
+
+  mis_psi_Z <- est_nde_nie(
+    data,
+    m_learners = cv_hal_contin_lrnr,
+    g_learners = cv_hal_binary_lrnr,
+    e_learners = cv_hal_binary_lrnr,
+    psi_Z_learners = mean_lrnr
+  )
+
+  ###################################################################
+
+  ## 8) m misspecified
+  ## Lemma 1. (iii) of 2012 Zheng and van der Laan satisfied
+
+  mis_m <- est_nde_nie(
+    data,
+    m_learners = fglm_lrnr,
+    g_learners = cv_hal_binary_lrnr,
     e_learners = cv_hal_binary_lrnr,
     psi_Z_learners = cv_hal_contin_lrnr
   )
@@ -110,12 +160,20 @@ fit_estimators <- function(data, cv_folds = 5) {
   # bundle estimators in list
   estimates <- list(corr_NIE = summary_with_steps(correct$nie),
                     corr_NDE = summary_with_steps(correct$nde),
+                    mis_i_NIE = summary_with_steps(mis_i$nie),
+                    mis_i_NDE = summary_with_steps(mis_i$nde),
+                    mis_ii_NIE = summary_with_steps(mis_ii$nie),
+                    mis_ii_NDE = summary_with_steps(mis_ii$nde),
+                    mis_iii_NIE = summary_with_steps(mis_iii$nie),
+                    mis_iii_NDE = summary_with_steps(mis_iii$nde),
                     mis_e_NIE = summary_with_steps(mis_e$nie),
                     mis_e_NDE = summary_with_steps(mis_e$nde),
-                    mis_m_NIE = summary_with_steps(mis_m$nie),
-                    mis_m_NDE = summary_with_steps(mis_m$nde),
                     mis_g_NIE = summary_with_steps(mis_g$nie),
-                    mis_g_NDE = summary_with_steps(mis_g$nde))
+                    mis_g_NDE = summary_with_steps(mis_g$nde),
+                    mis_psi_Z_NIE = summary_with_steps(mis_psi_Z$nie),
+                    mis_psi_Z_NDE = summary_with_steps(mis_psi_Z$nde),
+                    mis_m_NIE = summary_with_steps(mis_m$nie),
+                    mis_m_NDE = summary_with_steps(mis_m$nde))
 
   sim_out <- bind_rows(estimates, .id = "sim_type")
   return(sim_out)
