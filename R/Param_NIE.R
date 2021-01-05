@@ -113,7 +113,7 @@ Param_NIE <- R6::R6Class(
       e0_est <- 1 - e1_est
 
       # clever covariates
-      HY <- (treatment_indicator / g1_est)  * (1 - e0_est * g0_est / (e1_est * g1_est))
+      HY <- (treatment_indicator / g1_est) * (1 - e0_est * g0_est / (e1_est * g1_est))
       HZ <- (2 * a - 1) / g_est
 
       # output clever covariates

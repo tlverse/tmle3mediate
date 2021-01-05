@@ -55,8 +55,10 @@ mediator_task_fun_factory <- function(param_type = c("NDE", "NIE", "medshift"),
       m_pseudo = m_pseudo,
       tmle_task$get_tmle_node("W")
     ))
-    data.table::setnames(mediator_data,
-                         c("m_pseudo", tmle_task$npsem[["W"]]$variables))
+    data.table::setnames(
+      mediator_data,
+      c("m_pseudo", tmle_task$npsem[["W"]]$variables)
+    )
     mediator_task <- sl3::sl3_Task$new(
       data = mediator_data,
       outcome = "m_pseudo",

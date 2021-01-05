@@ -48,18 +48,17 @@ node_list <- list(
 set.seed(71281)
 ## define data (from tmle3_Spec base class)
 
-run_NIE <- function(data, binary_outcome = FALSE, max_iter = 100){
-
+run_NIE <- function(data, binary_outcome = FALSE, max_iter = 100) {
   if (binary_outcome) {
-
     learner_list <- list(
       Y = cv_hal_binary_lrnr,
       A = cv_hal_binary_lrnr
     )
-  } else{
-  learner_list <- list(
-    Y = cv_hal_contin_lrnr,
-    A = cv_hal_binary_lrnr)
+  } else {
+    learner_list <- list(
+      Y = cv_hal_contin_lrnr,
+      A = cv_hal_binary_lrnr
+    )
   }
 
   ## instantiate tmle3 spec for NIE
@@ -86,7 +85,6 @@ run_NIE <- function(data, binary_outcome = FALSE, max_iter = 100){
   tmle_fit_NIE <- fit_tmle3(tmle_task_NIE, likelihood_targeted_NIE, tmle_params_NIE, updater_NIE)
 
   return(tmle_fit_NIE)
-
 }
 
 ## run the above function for continuous and binary outcomes
@@ -107,26 +105,27 @@ tmle_spec_NIE <- tmle_NIE(
 
 tmle_fit_NIE_cont_y_one_step <- tmle3(tmle_spec_NIE, data_cont_y, node_list, learner_list <- list(
   Y = cv_hal_contin_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 tmle_fit_NIE_binary_y_one_step <- tmle3(tmle_spec_NIE, data_binary_y, node_list, learner_list <- list(
   Y = cv_hal_binary_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 ################################################################################
 
-run_NDE <- function(data, binary_outcome = FALSE, max_iter = 100){
-
+run_NDE <- function(data, binary_outcome = FALSE, max_iter = 100) {
   if (binary_outcome) {
-
     learner_list <- list(
       Y = cv_hal_binary_lrnr,
       A = cv_hal_binary_lrnr
     )
-  } else{
+  } else {
     learner_list <- list(
       Y = cv_hal_contin_lrnr,
-      A = cv_hal_binary_lrnr)
+      A = cv_hal_binary_lrnr
+    )
   }
 
   ## instantiate tmle3 spec for NDE
@@ -153,7 +152,6 @@ run_NDE <- function(data, binary_outcome = FALSE, max_iter = 100){
   ## fit tmle update
   tmle_fit_NDE <- fit_tmle3(tmle_task_NDE, likelihood_targeted_NDE, tmle_params_NDE, updater_NDE)
   return(tmle_fit_NDE)
-
 }
 
 ## run the above function for continuous and binary outcomes
@@ -172,11 +170,13 @@ tmle_spec_NDE <- tmle_NDE(
 
 tmle_fit_NDE_cont_y_one_step <- tmle3(tmle_spec_NDE, data_cont_y, node_list, learner_list <- list(
   Y = cv_hal_contin_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 tmle_fit_NDE_binary_y_one_step <- tmle3(tmle_spec_NDE, data_binary_y, node_list, learner_list <- list(
   Y = cv_hal_binary_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 ################################################################################
 ## instantiate tmle3 spec for ATE
@@ -188,7 +188,8 @@ set.seed(71281)
 ## fit in the continuous case and test
 tmle_fit_ATE_cont_y <- tmle3(tmle_spec_ATE, data_cont_y, node_list, learner_list <- list(
   Y = cv_hal_contin_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 ATE_from_NDE_NIE_cont_y <- tmle_fit_NDE_cont_y$summary$tmle_est +
   tmle_fit_NIE_cont_y$summary$tmle_est
@@ -196,8 +197,9 @@ ATE_from_NDE_NIE_cont_y <- tmle_fit_NDE_cont_y$summary$tmle_est +
 test_that(
   "ATE estimate from sum of NDE and NIE TMLE estimates matches tmle3 ATE for continuous outcome",
   expect_equal(ATE_from_NDE_NIE_cont_y,
-               tmle_fit_ATE_cont_y$summary$tmle_est,
-               tolerance = tmle_fit_ATE_cont_y$summary$se)
+    tmle_fit_ATE_cont_y$summary$tmle_est,
+    tolerance = tmle_fit_ATE_cont_y$summary$se
+  )
 )
 
 
@@ -206,7 +208,8 @@ test_that(
 
 tmle_fit_ATE_binary_y <- tmle3(tmle_spec_ATE, data_binary_y, node_list, learner_list <- list(
   Y = cv_hal_binary_lrnr,
-  A = cv_hal_binary_lrnr))
+  A = cv_hal_binary_lrnr
+))
 
 ATE_from_NDE_NIE_binary_y <- tmle_fit_NDE_binary_y$summary$tmle_est +
   tmle_fit_NIE_binary_y$summary$tmle_est
@@ -214,8 +217,9 @@ ATE_from_NDE_NIE_binary_y <- tmle_fit_NDE_binary_y$summary$tmle_est +
 test_that(
   "ATE estimate from sum of NDE and NIE TMLE estimates matches tmle3 ATE for binary outcome",
   expect_equal(ATE_from_NDE_NIE_binary_y,
-               tmle_fit_ATE_binary_y$summary$tmle_est,
-               tolerance = 1.96*tmle_fit_ATE_binary_y$summary$se)
+    tmle_fit_ATE_binary_y$summary$tmle_est,
+    tolerance = 1.96 * tmle_fit_ATE_binary_y$summary$se
+  )
 )
 
 
@@ -231,15 +235,21 @@ sim_truth_binary_y <- get_sim_truth_NIE_NDE(n_obs = 1e7, binary_outcome = TRUE, 
 psi_NDE_true_cont_y <- sim_truth_cont_y$NDE
 psi_NIE_true_cont_y <- sim_truth_cont_y$NIE
 
-test_that("TMLE estimate of NIE for the simulation matches true value",
+test_that(
+  "TMLE estimate of NIE for the simulation matches true value",
   expect_equal(tmle_fit_NIE_cont_y$summary$tmle_est,
-               psi_NIE_true_cont_y,
-               tolerance = tmle_fit_NIE_cont_y$summary$se))
+    psi_NIE_true_cont_y,
+    tolerance = tmle_fit_NIE_cont_y$summary$se
+  )
+)
 
-test_that("TMLE estimate of NDE for the simulation matches true value",
-          expect_equal(tmle_fit_NDE_cont_y$summary$tmle_est,
-                       psi_NDE_true_cont_y,
-                       tolerance = tmle_fit_NDE_cont_y$summary$se))
+test_that(
+  "TMLE estimate of NDE for the simulation matches true value",
+  expect_equal(tmle_fit_NDE_cont_y$summary$tmle_est,
+    psi_NDE_true_cont_y,
+    tolerance = tmle_fit_NDE_cont_y$summary$se
+  )
+)
 
 ################################################################################
 ## binary testing
@@ -247,13 +257,18 @@ test_that("TMLE estimate of NDE for the simulation matches true value",
 psi_NDE_true_binary_y <- sim_truth_binary_y$NDE
 psi_NIE_true_binary_y <- sim_truth_binary_y$NIE
 
-test_that("TMLE estimate of NIE for the simulation matches true value",
-          expect_equal(tmle_fit_NIE_binary_y$summary$tmle_est,
-                       psi_NIE_true_binary_y,
-                       tolerance = tmle_fit_NIE_binary_y$summary$se))
+test_that(
+  "TMLE estimate of NIE for the simulation matches true value",
+  expect_equal(tmle_fit_NIE_binary_y$summary$tmle_est,
+    psi_NIE_true_binary_y,
+    tolerance = tmle_fit_NIE_binary_y$summary$se
+  )
+)
 
-test_that("TMLE estimate of NDE for the simulation matches true value",
-          expect_equal(tmle_fit_NDE_binary_y$summary$tmle_est,
-                       psi_NDE_true_binary_y,
-                       tolerance = tmle_fit_NDE_binary_y$summary$se))
-
+test_that(
+  "TMLE estimate of NDE for the simulation matches true value",
+  expect_equal(tmle_fit_NDE_binary_y$summary$tmle_est,
+    psi_NDE_true_binary_y,
+    tolerance = tmle_fit_NDE_binary_y$summary$se
+  )
+)

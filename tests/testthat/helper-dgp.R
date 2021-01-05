@@ -9,9 +9,9 @@ make_dgp <- function() {
   # mediation mechanism
   z_mech <- function(w, a) {
     w <- data.frame(w)
-    z1_prob <- 1 - plogis((a + w[,1]) / (a + w[,1]^3 + 0.5))
-    z2_prob <- plogis((a - 1) + w[,2] / (w[,3] + 3))
-    z3_prob <- plogis((a - 1) + 2 * w[,1]^3 - 1 / (2 * w[,1] + 0.5))
+    z1_prob <- 1 - plogis((a + w[, 1]) / (a + w[, 1]^3 + 0.5))
+    z2_prob <- plogis((a - 1) + w[, 2] / (w[, 3] + 3))
+    z3_prob <- plogis((a - 1) + 2 * w[, 1]^3 - 1 / (2 * w[, 1] + 0.5))
     return(list(z1_prob, z2_prob, z3_prob))
   }
 
@@ -19,7 +19,7 @@ make_dgp <- function() {
   m_mech_cont <- function(w, a, z, eps_sd = 0.5) {
     w <- data.frame(w)
     z <- data.frame(z)
-    y <- z[,1]^2 + z[,2]^2 - z[,3] + exp(a + z[,3] / (1 + rowSums(w)^2)) +
+    y <- z[, 1]^2 + z[, 2]^2 - z[, 3] + exp(a + z[, 3] / (1 + rowSums(w)^2)) +
       rnorm(length(a), mean = 0, sd = eps_sd)
     return(y)
   }
@@ -28,7 +28,7 @@ make_dgp <- function() {
   m_mech_binary <- function(w, a, z_probs, eps_sd = 0.5) {
     w <- data.frame(w)
     z_probs <- data.frame(z_probs)
-    y_probs <- plogis(z_probs[,1]^2 + z_probs[,2]^2 - z_probs[,3] + exp(a + z_probs[,3] / (1 + rowSums(w)^2)) +
+    y_probs <- plogis(z_probs[, 1]^2 + z_probs[, 2]^2 - z_probs[, 3] + exp(a + z_probs[, 3] / (1 + rowSums(w)^2)) +
       rnorm(length(a), mean = 0, sd = eps_sd))
     return(y_probs)
   }
@@ -76,7 +76,6 @@ make_simulated_data <- function(n_obs = 10000, binary_outcome = FALSE) { # no. o
   if (binary_outcome) {
     y_probs <- dgp$m_mech_binary(W, A, z_probs = cbind(z_mech[[1]], z_mech[[2]], z_mech[[3]]), eps_sd = 0.5)
     Y <- rbinom(n_obs, 1, prob = y_probs)
-
   } else {
     Y <- dgp$m_mech_cont(W, A, Z, eps_sd = 0.5)
     Y_test <- dgp$m_mech_cont(W, A, z_mech, eps_sd = 0.5)

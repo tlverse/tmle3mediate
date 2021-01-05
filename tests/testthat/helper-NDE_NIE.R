@@ -1,5 +1,4 @@
 get_sim_truth_NIE_NDE <- function(n_obs = 1e7, binary_outcome = FALSE, EIC = FALSE) {
-
   dgp <- make_dgp()
 
   # compute large set of data
@@ -55,7 +54,6 @@ get_sim_truth_NIE_NDE <- function(n_obs = 1e7, binary_outcome = FALSE, EIC = FAL
 
     psi_Z_NDE <- EY_A1_Z0 - EY_A0_Z0
     psi_Z_NIE <- EY_A1_Z1 - EY_A1_Z0
-
   } else {
     # Y(1, 1)
     EY_A1_Z1 <- dgp$m_mech_cont(W, 1, Z1, eps_sd = 0)
@@ -72,38 +70,43 @@ get_sim_truth_NIE_NDE <- function(n_obs = 1e7, binary_outcome = FALSE, EIC = FAL
 
     psi_Z_NDE <- EY_A1_Z0 - EY_A0_Z0
     psi_Z_NIE <- EY_A1_Z1 - EY_A1_Z0
-    }
+  }
 
 
   NDE <- mean(psi_Z_NDE)
   NIE <- mean(psi_Z_NIE)
 
   if (EIC) {
-
-    df1 <- cbind(Z1, W) %>% as.data.frame
-    df0 <- cbind(Z0, W) %>% as.data.frame
-    Q_Z1 <- df1 %>% dplyr::group_by(
+    df1 <- cbind(Z1, W) %>% as.data.frame()
+    df0 <- cbind(Z0, W) %>% as.data.frame()
+    Q_Z1 <- df1 %>%
+      dplyr::group_by(
         Z_1, Z_1, Z_2, Z_3,
         W_1, W_1, W_2, W_3
-      ) %>% summarize(
+      ) %>%
+      summarize(
         prob = n() / n_obs
       )
-    Q_Z0 <- df0 %>% dplyr::group_by(
-      Z_1, Z_1, Z_2, Z_3,
-      W_1, W_1, W_2, W_3
-    ) %>% summarize(
-      prob = n() / n_obs
-    )
+    Q_Z0 <- df0 %>%
+      dplyr::group_by(
+        Z_1, Z_1, Z_2, Z_3,
+        W_1, W_1, W_2, W_3
+      ) %>%
+      summarize(
+        prob = n() / n_obs
+      )
 
     Q_Z_Ais1 <- df1 %>%
       dplyr::left_join(
         Q_Z1
-      ) %>% pull(prob)
+      ) %>%
+      pull(prob)
 
     Q_Z_Ais0 <- df0 %>%
       dplyr::left_join(
         Q_Z0
-      ) %>% pull(prob)
+      ) %>%
+      pull(prob)
 
     Q_Z_ratio <- Q_Z_Ais0 / Q_Z_Ais1
 
@@ -149,7 +152,6 @@ get_sim_truth_NIE_NDE <- function(n_obs = 1e7, binary_outcome = FALSE, EIC = FAL
       EIC_NDE = EIC_NDE,
       EIC_NIE = EIC_NIE
     ))
-
   } else {
     # output: true values of nuisance parameters
     return(list(
