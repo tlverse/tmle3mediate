@@ -10,29 +10,27 @@ init:
 install:
   ps: Bootstrap
 
+cache:
+  - C:\RLibrary -> appveyor.yml
+
+# Adapt as necessary starting from here
 branches:
   only:
     - master
 
-cache:
-  - C:\RLibrary -> appveyor.yml
-
 environment:
   global:
     WARNINGS_ARE_ERRORS: 0
-    _R_CHECK_FORCE_SUGGESTS_: false
+        R_ARCH: x64
     USE_RTOOLS: true
-    PKGTYPE: both
+    R_REMOTES_STANDALONE: true
 
   matrix:
     - R_VERSION: release
-      R_ARCH: x64
 
 build_script:
-  - echo Current directory=%CD%
-  - travis-tool.sh install_r base64
   - travis-tool.sh install_github r-lib/sessioninfo r-lib/covr
-  - travis-tool.sh install_github tlverse/sl3 tlverse/tmle3
+  - travis-tool.sh install_github tlverse/sl3 tlverse/tmle3 nhejazi/medshift
   - travis-tool.sh install_deps
 
 test_script:

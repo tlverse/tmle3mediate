@@ -1,5 +1,5 @@
-title: tmle3shift
-url: https://tlverse.org/tmle3shift
+title: tmle3mediate
+url: https://tlverse.org/tmle3mediate
 template:
   params:
     bootswatch: flatly
@@ -12,11 +12,11 @@ navbar:
     - text: "tmle3"
       href: "index.html"
     - text: "Overview"
-      href: "articles/shift_tmle.html"
+      href: "articles/intro_tmle3mediate.html"
     - text: "Articles"
       href: "articles/index.html"
     - text: "Reference"
       href: "reference/index.html"
   right:
     - icon: fa-github fa-lg
-      href: https://github.com/tlverse/tmle3shift
+      href: https://github.com/tlverse/tmle3mediate

@@ -2,9 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_medshift.R
 \name{tmle3_Spec_medshift}
 \alias{tmle3_Spec_medshift}
-\title{TML Estimator for the Counterfactual Mean of a Joint Stochastic Intervention
-Defining the Population Intervention (In)direct Effects}
+\title{TML Estimator for the Population Intervention (In)direct Effects}
 \description{
-TML Estimator for the Counterfactual Mean of a Joint Stochastic Intervention
-Defining the Population Intervention (In)direct Effects
+TML Estimator for the Population Intervention (In)direct Effects
 }

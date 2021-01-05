@@ -9,32 +9,33 @@ env:
 language: r
 sudo: required
 cache: packages
-cran: http://cran.rstudio.com
 warnings_are_errors: true
 r_build_args: "--no-manual"
 r_check_args: "--no-build-vignettes --no-manual"
 
+addons:
+  apt:
+    packages:
+      - libgit2-dev
+
 r:
+  - oldrel
   - release
   - devel
 
-before_install:
-  - Rscript -e 'update.packages(ask = FALSE)'
-
 r_packages:
   - devtools
-  - sessioninfo
   - covr
+  - sessioninfo
   - data.table
-  - delayed
-  - origami
-  - hal9001
 
 r_github_packages:
   - tlverse/sl3
   - tlverse/tmle3
+  - nhejazi/medshift
 
 after_success:
+  ## coverage
   - travis_wait 80 Rscript -e 'covr::codecov()'
 
 on_failure:

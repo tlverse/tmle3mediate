@@ -1,29 +1,21 @@
-^\.git
-^\.git/*
-^\.gitignore$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^README\.md
-^sandbox
-
-# Automated testing files.
+^Makefile$
+^README\.Rmd$
+^README\.html$
+^README-.*\.png$
+^README_cache$
 ^\.travis\.yml$
 ^appveyor\.yml$
 ^codecov\.yml$
-# Files from building the Guide-to-SuperLearner.rmd vignette.
-^SuperLearner.png$
-^vignettes/[^/]*_cache
-# other miscellaneous non-CRAN files
-xgboost.model
-deploy.sh
-^docs$
-^README\.Rmd$
-^README-.*\.Rmd$
-^README\.html$
-^README-.*\.png$
-^cran-comments.md$
-^CONTRIBUTING\.md$
-^Makefile$
-^LICENSE$
-man-roxygen
 ^_pkgdown\.yml$
+^LICENSE\.md$
+^TODO\.md$
+
+# Extra miscellaneous support files/directories.
+^cran-comments\.md$
+^CONTRIBUTING\.md$
+^sandbox$
+^paper$
+^docs$
+^CRAN-RELEASE$

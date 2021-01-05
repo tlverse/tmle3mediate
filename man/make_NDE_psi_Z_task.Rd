@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_NDE.R
 \name{make_NDE_psi_Z_task}
 \alias{make_NDE_psi_Z_task}
-\title{Make task for derived likelihood factor psi_Z(W) for NDE}
+\title{Make Task for Derived Likelihood Factor psi_Z(W) for Natural Direct Effect}
 \usage{
 make_NDE_psi_Z_task(tmle_task, likelihood)
 }
@@ -14,6 +14,6 @@ for use in constructing components required for TML estimation.}
 \code{\link{stochastic_mediation_likelihood}} helper.}
 }
 \description{
-Make task for derived likelihood factor psi_Z(W) for NDE
+Make Task for Derived Likelihood Factor psi_Z(W) for Natural Direct Effect
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_medshift.R
 \name{make_phi_task}
 \alias{make_phi_task}
-\title{Make task for derived likelihood factor phi(W)}
+\title{Make Task for Derived Likelihood Factor phi(W)}
 \usage{
 make_phi_task(tmle_task, likelihood)
 }
@@ -14,6 +14,6 @@ for use in constructing components required for TML estimation.}
 \code{\link{stochastic_mediation_likelihood}} helper.}
 }
 \description{
-Make task for derived likelihood factor phi(W)
+Make Task for Derived Likelihood Factor phi(W)
 }
 \keyword{internal}

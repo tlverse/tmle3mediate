@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_medshift.R
 \name{stochastic_mediation_likelihood}
 \alias{stochastic_mediation_likelihood}
-\title{Stochastic Mediation Likelihood Factors}
+\title{Mediation Likelihood Factors for Population Intervention (In)Direct Effects}
 \usage{
 stochastic_mediation_likelihood(tmle_task, learner_list)
 }
@@ -14,6 +14,6 @@ for use in constructing components required for TML estimation.}
 \code{\link{stochastic_mediation_likelihood}} helper.}
 }
 \description{
-Stochastic Mediation Likelihood Factors
+Mediation Likelihood Factors for Population Intervention (In)Direct Effects
 }
 \keyword{internal}

@@ -1,4 +1,4 @@
-#' Defines a TML Estimator for the Natural Indirect Effect
+#' TML Estimator for the Natural Indirect Effect
 #'
 #' @importFrom R6 R6Class
 #' @importFrom tmle3 tmle3_Spec define_lf tmle3_Update Targeted_Likelihood
@@ -81,7 +81,7 @@ tmle3_Spec_NIE <- R6::R6Class(
 
 ###############################################################################
 
-#' Defines a TML Estimator for the Natural Indirect Effect
+#' TML Estimator for the Natural Indirect Effect
 #'
 #' O = (W, A, Z, Y)
 #' W = Covariates (possibly multivariate)
@@ -90,20 +90,20 @@ tmle3_Spec_NIE <- R6::R6Class(
 #' Y = Outcome (binary or bounded continuous)
 #'
 #' @param e_learners A \code{\link[sl3]{Stack}} (or other learner class that
-#'   inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
-#'   instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
-#'   parameterized propensity score that conditions on the mediators, i.e.,
-#'   e = P(A | Z, W).
+#'  inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
+#'  instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
+#'  parameterized propensity score that conditions on the mediators, i.e.,
+#'  \eqn{e = P(A \mid Z, W)}.
 #' @param psi_Z_learners A \code{\link[sl3]{Stack}} (or other learner class
-#'   that inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or
-#'   set of instantiated learners from \pkg{sl3}, to be used in a regression of
-#'   a pseudo-outcome on the baseline covariates, i.e., psi_Z(W) =
-#'   E[m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W].
+#'  that inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or
+#'  set of instantiated learners from \pkg{sl3}, to be used in a regression of
+#'  a pseudo-outcome on the baseline covariates, i.e.,
+#'  \eqn{psi_Z(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) \mid A = 0, W]}.
 #' @param max_iter A \code{numeric} setting the maximum iterations allowed in
-#'   the targeting step based on universal least favorable submodels.
+#'  the targeting step based on universal least favorable submodels.
 #' @param step_size A \code{numeric} giving the step size (\code{delta_epsilon}
-#'   in \code{tmle3}) to be used in the targeting step based on universal least
-#'   favorable submodels.
+#'  in \code{\link[tmle3]{tmle3}}) to be used in the targeting step based on
+#'  universal least favorable submodels.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @export
@@ -120,7 +120,7 @@ tmle_NIE <- function(e_learners, psi_Z_learners,
 
 ###############################################################################
 
-#' Make task for derived likelihood factor psi_Z(W) for NIE
+#' Make Task for Derived Likelihood Factor psi_Z(W) for Natural Indirect Effect
 #'
 #' @param tmle_task A \code{[tmle3]{tmle3_Task}} specifying the data and NPSEM
 #'  for use in constructing components required for TML estimation.

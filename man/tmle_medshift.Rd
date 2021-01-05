@@ -2,8 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_medshift.R
 \name{tmle_medshift}
 \alias{tmle_medshift}
-\title{TML Estimator for the Counterfactual Mean of a Joint Stochastic Intervention
-Defining the Population Intervention (In)direct Effects}
+\title{TML Estimator for the Population Intervention (In)direct Effects}
 \usage{
 tmle_medshift(
   shift_type = "ipsi",
@@ -17,8 +16,7 @@ tmle_medshift(
 }
 \arguments{
 \item{shift_type}{A \code{character} defining the type of shift to be
-applied to the exposure -- an incremental propensity score intervention, by
-default.}
+applied to the exposure -- an incremental propensity score intervention.}
 
 \item{delta}{A \code{numeric}, specifying the magnitude of the shift.}
 
@@ -26,20 +24,20 @@ default.}
 inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
 instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
 parameterized propensity score that conditions on the mediators, i.e.,
-e = P(A | Z, W).}
+\eqn{e = P(A \mid Z, W)}.}
 
 \item{phi_learners}{A \code{\link[sl3]{Stack}} (or other learner class that
 inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
 instantiated learners from \pkg{sl3}, to be used in a regression of a
 pseudo-outcome on the baseline covariates, i.e.,
-phi(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) | W).}
+\eqn{phi(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) | W)]}.}
 
 \item{max_iter}{A \code{numeric} setting the maximum iterations allowed in
 the targeting step based on universal least favorable submodels.}
 
 \item{step_size}{A \code{numeric} giving the step size (\code{delta_epsilon}
-in \code{tmle3}) to be used in the targeting step based on universal least
-favorable submodels.}
+in \code{\link[tmle3]{tmle3}}) to be used in the targeting step based on
+universal least favorable submodels.}
 
 \item{...}{Additional arguments (currently unused).}
 }

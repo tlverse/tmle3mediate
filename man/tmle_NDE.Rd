@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_NDE.R
 \name{tmle_NDE}
 \alias{tmle_NDE}
-\title{Defines a TML Estimator for the Natural Direct Effect}
+\title{TML Estimator for the Natural Direct Effect}
 \usage{
 tmle_NDE(e_learners, psi_Z_learners, max_iter = 10000, step_size = 1e-06, ...)
 }
@@ -11,20 +11,20 @@ tmle_NDE(e_learners, psi_Z_learners, max_iter = 10000, step_size = 1e-06, ...)
 inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or set of
 instantiated learners from \pkg{sl3}, to be used in fitting a cleverly
 parameterized propensity score that conditions on the mediators, i.e.,
-e = P(A | Z, W).}
+\eqn{e = P(A \mid Z, W)}.}
 
 \item{psi_Z_learners}{A \code{\link[sl3]{Stack}} (or other learner class
 that inherits from \code{\link[sl3]{Lrnr_base}}), containing a single or
 set of instantiated learners from \pkg{sl3}, to be used in a regression of
-a pseudo-outcome on the baseline covariates, i.e., psi_Z(W) =
-E\link{m(A = 1, Z, W) - m(A = 0, Z, W) | A = 0, W}.}
+a pseudo-outcome on the baseline covariates, i.e.,
+\eqn{psi_Z(W) = E[m(A = 1, Z, W) - m(A = 0, Z, W) \mid A = 0, W]}.}
 
 \item{max_iter}{A \code{numeric} setting the maximum iterations allowed in
 the targeting step based on universal least favorable submodels.}
 
 \item{step_size}{A \code{numeric} giving the step size (\code{delta_epsilon}
-in \code{tmle3}) to be used in the targeting step based on universal least
-favorable submodels.}
+in \code{\link[tmle3]{tmle3}}) to be used in the targeting step based on
+universal least favorable submodels.}
 
 \item{...}{Additional arguments (currently unused).}
 }

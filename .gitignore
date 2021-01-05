@@ -2,15 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
-.future
 README.html
 vignettes/*.html
-sandbox/data
-sandbox/plots
 
 # macOS files
 .DS_Store
-inst/doc
 
 # Emacs backup files
 *~

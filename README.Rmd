@@ -16,21 +16,36 @@ knitr::opts_chunk$set(
 
 # R/`tmle3mediate`
 
-[![Travis-CI Build Status](https://travis-ci.org/tlverse/tmle3mediate.svg?branch=master)](https://travis-ci.org/tlverse/tmle3mediate)
+[![Travis-CI Build Status](https://travis-ci.com/tlverse/tmle3mediate.svg?branch=master)](https://travis-ci.com/tlverse/tmle3mediate)
 [![AppVeyor Build  Status](https://ci.appveyor.com/api/projects/status/github/tlverse/tmle3mediate?branch=master&svg=true)](https://ci.appveyor.com/project/tlverse/tmle3mediate)
 [![Coverage Status](https://img.shields.io/codecov/c/github/tlverse/tmle3mediate/master.svg)](https://codecov.io/github/tlverse/tmle3mediate?branch=master)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 > Targeted Learning for Causal Mediation Analysis
 
-__Authors:__ [TO FILL IN]
+__Authors:__ [Nima Hejaz](https://nimahejazi.org), James Duncan, David McCoy,
+and [Mark van der Laan](https://vanderlaan-lab.org)
 
 ---
 
 ## What's `tmle3mediate`?
 
-The `tmle3mediate` R package is designed to [TO FILL IN]
+`tmle3mediate` is an adapter/extension R package in the `tlverse` ecosystem that
+provides support for _causal mediation analysis_, for a range of target
+parameters applicable in settings with mediating variables. Causal effects for
+which estimation machinery are provided include the controlled direct effect
+[@petersen2006estimation; @didelez2012direct; @vanderweele2015explanation], the
+natural (in)direct effects [@robins1992identifiability; @zheng2012targeted], and
+the population intervention (in)direct effects [@diaz2020causal]. By building on
+the core `tlverse` grammar exposed by the `tmle3` R package, `tmle3mediate`
+accommodates targeted maximum likelihood (or targeted minimum loss-based)
+estimation of these causal effect parameters through a unified interface. For a
+general discussion of the framework of targeted minimum loss-based estimation
+and its relationship to statistical causal inference, the motivated reader may
+consider consulting @vdl2011targeted and @vdl2018targeted. A practical and
+accessible introduction using the `tlverse` software ecosystem is provided in
+@vdl2021targeted (see https://tlverse.org/tlverse-handbook).
 
 ---
 
@@ -123,6 +138,43 @@ prior to submitting a pull request.
 ## Citation
 
 After using the `tmle3mediate` R package, please cite the following:
+
+        @software{hejazi2021tmle3mediate-rpkg,
+          author = {Hejazi, Nima S and Duncan, James and McCoy, David and
+            {van der Laan}, Mark J},
+          title = {{tmle3mediate}: Targeted Learning for Causal Mediation
+            Analysis},
+          year  = {2021},
+          doi = {},
+          url = {https://github.com/tlverse/tmle3mediate},
+          note = {R package version 0.0.2}
+        }
+
+---
+
+## Related
+
+* [R/`medshift`](https://github.com/nhejazi/medshift) - An R package providing
+  tools to estimate the causal effect of stochastic treatment regimes in
+  the mediation setting, including classical (IPW) and doubly robust one-step
+  estimators. This is an implementation of the methodology explored
+  by @diaz2020causal.
+
+* [R/`medoutcon`](https://github.com/nhejazi/medoutcon) - An R package providing
+  doubly robust estimators (one-step, TMLE) of the interventional (in)direct
+  effects, which are defined by joint static-stochastic interventions applied
+  to the exposure and mediators, respectively. These effect definitions are
+  similar to but more general than the natural (in)direct effects. This is an
+  implementation of the methodology explored by @diaz2020nonparametric.
+
+---
+
+## Funding
+
+The development of this software was supported in part through [UC Berkeley's
+Biomedical Big Data training program](http://bbd.berkeley.edu/), made possible
+by grant [T32 LM012417](https://projectreporter.nih.gov/project_info_description.cfm?aid=9248418&icde=37849831&ddparam=&ddvalue=&ddsub=&cr=1&csb=default&cs=ASC&pball=)
+from the National Institutes of Health.
 
 ---
 

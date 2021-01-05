@@ -2,9 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{mediator_task_fun_factory}
 \alias{mediator_task_fun_factory}
-\title{Factory function that returns an \code{[sl3]{sl3_Task}} generator function
-used in fitting the appropriate mediator derived conditional likelihood
-factor for NDE/NIE/medshift.}
+\title{Factory function that returns an \code{\link[sl3]{sl3_Task}} generator
+function used in fitting the appropriate mediator derived conditional
+likelihood factor for NDE/NIE/medshift.}
 \usage{
 mediator_task_fun_factory(
   param_type = c("NDE", "NIE", "medshift"),
@@ -24,8 +24,8 @@ A \code{function} that takes a \code{[tmle3]{tmle3_Task}} and a
 \code{[tmle3]{Likelihood}} and returns a new \code{[sl3]{sl3_Task}}.
 }
 \description{
-Factory function that returns an \code{[sl3]{sl3_Task}} generator function
-used in fitting the appropriate mediator derived conditional likelihood
-factor for NDE/NIE/medshift.
+Factory function that returns an \code{\link[sl3]{sl3_Task}} generator
+function used in fitting the appropriate mediator derived conditional
+likelihood factor for NDE/NIE/medshift.
 }
 \keyword{internal}

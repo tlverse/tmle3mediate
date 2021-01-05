@@ -5,14 +5,10 @@ library(stringr)
 library(hal9001)
 library(sl3)
 library(tmle3)
-library(devtools)
 set.seed(7128816)
 
 # delta used for stochastic intervention
 delta_ipsi <- 0.5
-
-# source in utils.R
-testthat::source_test_helpers()
 
 ################################################################################
 # setup learners for the nuisance parameters

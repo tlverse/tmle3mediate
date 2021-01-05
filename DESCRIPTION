@@ -1,15 +1,25 @@
 Package: tmle3mediate
 Title: Targeted Learning for Causal Mediation Analysis
-Version: 0.0.1
-Authors@R:
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-Depends:
-    R (>= 3.4.0)
+Version: 0.0.2
+Authors@R: c(
+    person("Nima", "Hejazi", email = "nh@nimahejazi.org",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-7127-2789")),
+    person("James", "Duncan", email = "jpduncan@berkeley.edu",
+           role = "aut"),
+    person("David", "McCoy", email = "david_mccoy@berkeley.edu",
+           role = "aut"),
+    person("Mark", "van der Laan", email = "laan@berkeley.edu",
+           role = c("ctb", "ths"),
+           comment = c(ORCID = "0000-0003-1432-5511"))
+  )
+Maintainer: Nima Hejazi <nh@nimahejazi.org>
+Description: Targeted maximum likelihood (TML) estimation of population-level
+    causal mediation effects defined by static or stochastic interventions. The
+    causal effects for which targeted doubly robust estimators are provided
+    include the controlled direct effect, the natural (in)direct effects, and
+    the population intervention (in)direct effects.
+Depends: R (>= 3.4.0)
 Imports:
     R6,
     uuid,
@@ -37,11 +47,11 @@ Remotes:
     github::tlverse/sl3,
     github::tlverse/tmle3,
     github::nhejazi/medshift
+License: GPL-3
 URL: https://tlverse.org/tmle3mediate
 BugReports: https://github.com/tlverse/tmle3mediate/issues
-License: GPL-3
 Encoding: UTF-8
-LazyLoad: yes
 LazyData: true
-RoxygenNote: 7.1.0
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE, r6 = FALSE)

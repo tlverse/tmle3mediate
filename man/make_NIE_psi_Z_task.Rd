@@ -4,7 +4,7 @@
 \alias{make_NIE_psi_Z_task}
 \alias{make_NIE_psi_Z0_task}
 \alias{make_NIE_psi_Z1_task}
-\title{Make task for derived likelihood factor psi_Z(W) for NIE}
+\title{Make Task for Derived Likelihood Factor psi_Z(W) for Natural Indirect Effect}
 \usage{
 make_NIE_psi_Z0_task(tmle_task, likelihood)
 
@@ -18,6 +18,6 @@ for use in constructing components required for TML estimation.}
 \code{\link{stochastic_mediation_likelihood}} helper.}
 }
 \description{
-Make task for derived likelihood factor psi_Z(W) for NIE
+Make Task for Derived Likelihood Factor psi_Z(W) for Natural Indirect Effect
 }
 \keyword{internal}

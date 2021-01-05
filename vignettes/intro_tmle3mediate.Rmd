@@ -1,29 +1,30 @@
 ---
-title: "Semi-Parametric Causal Mediation Analysis"
-author: "[James Duncan](https://statistics.berkeley.edu/people/james-duncan) 
-  [David McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html) and 
-  [Nima Hejazi](https://nimahejazi.org) "
+title: "Targeted Learning for Causal Mediation Analysis"
+author: "[James Duncan](https://statistics.berkeley.edu/people/james-duncan)
+  [David McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html) and
+  [Nima Hejazi](https://nimahejazi.org)"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: ../inst/REFERENCES.bib
 vignette: >
-  %\VignetteIndexEntry{Semi-Parametric Causal Mediation Analysis}
+  %\VignetteIndexEntry{Targeted Learning for Causal Mediation Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 # Background
 
-We are interested in assessing the natural direct effect (NDE) and the natural indirect effect
-(NIE), based on the decomposition of the total effect as formulated in @Zheng2012a.
+We are interested in assessing the natural direct effect (NDE) and the natural
+indirect effect (NIE), based on the decomposition of the total effect as
+formulated in @zheng2012targeted.
 
-To make our methodology and results comparable to existing tools, we'll use as our running example a simple data set from an
-observational study of the relationship between BMI and kids behavior,
-distributed as part of the [`mma` R package on
-CRAN](https://CRAN.R-project.org/package=mma). 
+To make our methodology and results comparable to existing tools, we'll use as
+our running example a simple data set from an observational study of the
+relationship between BMI and kids behavior, distributed as part of the [`mma` R
+package on CRAN](https://CRAN.R-project.org/package=mma).
 
-First, let's load the packages we'll be using and set a seed; then, load this data set and take a quick look
-at it
+First, let's load the packages we'll be using and set a seed; then, load this
+data set and take a quick look at it
 
 ```{r load_data, message=FALSE, warning=FALSE}
 # preliminaries
@@ -31,12 +32,10 @@ library(data.table)
 library(dplyr)
 library(sl3)
 library(tmle3)
-devtools::load_all('/Users/davidmccoy/Documents/PhD/BBD_capstone/tmle3mediate')
 library(mma)
 `%notin%` <- Negate(`%in%`)
 library(here)
 source(here("sandbox/01_setup_data.R"))
-
 
 set.seed(429153)
 
@@ -61,7 +60,7 @@ observations but much the same structure as the original:
 
 ```{r remove_na, echo=FALSE, message=FALSE, warning=FALSE}
 # remove missing values
-weight_behavior_complete <- weight_behavior[complete.cases(weight_behavior), ] #567, 124 obs removed
+weight_behavior_complete <- weight_behavior[complete.cases(weight_behavior), ]
 
 weight_behavior_complete$sports <-
   as.numeric(weight_behavior_complete$sports) - 1
@@ -82,7 +81,8 @@ exposure <- "sports"
 outcome <- "bmi"
 mediators <- c("snack", "exercises", "overweigh")
 
-covars <- colnames(weight_behavior_complete[colnames(weight_behavior_complete) %notin% c(exposure, outcome, mediators)])
+covars <- colnames(weight_behavior_complete[colnames(weight_behavior_complete)
+                   %notin% c(exposure, outcome, mediators)])
 
 node_list <- list(
   W = covars,
@@ -92,17 +92,18 @@ node_list <- list(
 )
 ```
 
-Here the nodelist tells SL3 the parents of each node, for example, Z has parents A and W, and Y has parents Z, A, and W. 
+Here the nodelist tells `sl3` the parents of each node, for example, Z has
+parents A and W, and Y has parents Z, A, and W.
 
+In our analysis, we are interested in decomposing the average treatment effect
+(ATE) for a binary treatment variable into its corresponding natural direct
+effects and natural indirect effects as first proposed by Pearl @Pearl2001a.
 
-In our analysis, we are interested in decomposing the average treatment effect (ATE) for a binary treatment variable
-into its corresponding natural direct effects and natural indirect effects as first proposed by Pearl @Pearl2001a.
-
-We take a semi-parametric approach which incorporate ensemble machine learning into the estimation procedure. To do-so
-we rely on the facilities provided in the [`sl3` R
-package](https://tlverse.org/sl3) [@coyle2018sl3]. For a complete guide on using
-the `sl3` R package, consider consulting https://tlverse.org/sl3, or
-https://tlverse.org (and https://github.com/tlverse) for the `tlverse`
+We take a semi-parametric approach which incorporate ensemble machine learning
+into the estimation procedure. To do-so we rely on the facilities provided in
+the [`sl3` R package](https://tlverse.org/sl3) [@coyle2020sl3]. For a complete
+guide on using the `sl3` R package, consider consulting https://tlverse.org/sl3,
+or https://tlverse.org (and https://github.com/tlverse) for the `tlverse`
 ecosystem, of which `sl3` is a major part. We construct an ensemble learner
 using a handful of popular machine learning algorithms below:
 
@@ -131,20 +132,19 @@ hal_binary_lrnr <- Lrnr_hal9001$new(
 cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
 cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
 
-
 learner_list <- list(
   Y = cv_hal_contin_lrnr,
   A = cv_hal_binary_lrnr
 )
-
 ```
 
 ## Decomposing the ATE
 
-We decompose the ATE as: 
+We decompose the ATE as:
 
 \begin{equation*}
-  \mathbb{E}[Y(1) - Y(0)] = \underbrace{\mathbb{E}[Y(1, Z(0)) - Y(0, Z(0))]}_{NDE} + \underbrace{\mathbb{E}[Y(1, Z(1)) - Y(1, Z(0))]}_{NIE}
+  \mathbb{E}[Y(1) - Y(0)] = \underbrace{\mathbb{E}[Y(1, Z(0)) -
+    Y(0, Z(0))]}_{NDE} + \underbrace{\mathbb{E}[Y(1, Z(1)) - Y(1, Z(0))]}_{NIE}
 \end{equation*}
 
 Considering the joint likelihood:
@@ -152,60 +152,140 @@ Considering the joint likelihood:
 \begin{equation*}
   p(w, a, z, y) = \underbrace{p(y | w, a, z)}_{Q_Y(A, W, Z)}
   \underbrace{p(z | w, a)}_{Q_Z(Z | A, W)}
-  \underbrace{p(a | w)}_{g(A|W)} 
+  \underbrace{p(a | w)}_{g(A|W)}
   \underbrace{p(w)}_{Q_W}
 \end{equation*}
 
-\textbf{The NDE is defined as:} 
+\textbf{The NDE is defined as:}
 
-$$\Psi_{NDE}=\mathbb{E}[Y(1, Z(0)) - Y(0, Z(0))] 
-\overset{\text{rand.}}{=} \sum_w \sum_z [\underbrace{\mathbb{E}(Y | A = 1, w, z)}_{\bar{Q}_Y(A = 1, w, z)} - \underbrace{\mathbb{E}(Y | A = 0, w, z)}_{\bar{Q}_Y(A = 0, w, z)}]  \times \underbrace{p(z | A = 0, w)}_{Q_Z(0, w))} \underbrace{p(w)}_{Q_W}$$
+$$\Psi_{NDE}=\mathbb{E}[Y(1, Z(0)) - Y(0, Z(0))]
+\overset{\text{rand.}}{=} \sum_w \sum_z
+[\underbrace{\mathbb{E}(Y | A = 1, w, z)}_{\bar{Q}_Y(A = 1, w, z)} -
+\underbrace{\mathbb{E}(Y | A = 0, w, z)}_{\bar{Q}_Y(A = 0, w, z)}] \times
+\underbrace{p(z | A = 0, w)}_{Q_Z(0, w))} \underbrace{p(w)}_{Q_W}$$
 
-We begin estimating the NDE by using $\hat{\bar{Q}}_Y$, the estimator for $Q_Y(A, W, Z)$ above (Y given A, W and Z) to obtain the conditional expectations $\bar{Q}_Y(W,1,Z)$ for A =1  and likewise $\bar{Q}_Y(W,0,Z)$ for A = 0. We determine this difference $\bar{Q}_Y(W,1,Z)$ - $\bar{Q}_Y(W,0,Z)$, we call this $Q_{diff}$. $Q_{diff}$ is then regressed on W among control observations only. Overall, $Q_{diff}$ represents the difference in Y due to A while keeping W and Z at their natural values. When we regress this difference of W among the controls we are getting the expected $Q_{diff}$ if all individuals had A = 0 covariates. Since W is a parent of Z by regressing this portion of W on $Q_{diff}$ we can remove part of the marginal impact of Z on $Q_{diff}$. Any residual additive effect of Z on $Q_{diff}$ is removed during the TMLE step using the mediator clever covariate.
+We begin estimating the NDE by using $\hat{\bar{Q}}_Y$, the estimator for
+$Q_Y(A, W, Z)$ above (Y given A, W and Z) to obtain the conditional expectations
+$\bar{Q}_Y(W,1,Z)$ for A =1  and likewise $\bar{Q}_Y(W,0,Z)$ for A = 0. We
+determine this difference $\bar{Q}_Y(W,1,Z)$ - $\bar{Q}_Y(W,0,Z)$, we call this
+$Q_{diff}$. $Q_{diff}$ is then regressed on W among control observations only.
+Overall, $Q_{diff}$ represents the difference in Y due to A while keeping W and
+Z at their natural values. When we regress this difference of W among the
+controls we are getting the expected $Q_{diff}$ if all individuals had A = 0
+covariates. Since W is a parent of Z by regressing this portion of W on
+$Q_{diff}$ we can remove part of the marginal impact of Z on $Q_{diff}$. Any
+residual additive effect of Z on $Q_{diff}$ is removed during the TMLE step
+using the mediator clever covariate.
 
 
-The clever covariate for this estimate is defined as: 
-$$C_Y(Q_Z,g)(O) = \Bigg\{\frac{I(A=1)}{g(1|w)}\frac{Q_Z(Z|W,0)}{Q_Z(Z|W,1)} - \frac{I(A=0)}{g(0|W)} \Bigg\}$$
+The clever covariate for this estimate is defined as:
+$$C_Y(Q_Z,g)(O) = \Bigg\{\frac{I(A=1)}{g(1|w)}\frac{Q_Z(Z|W,0)}{Q_Z(Z|W,1)} -
+\frac{I(A=0)}{g(0|W)} \Bigg\}$$
 
-Breaking this down: $\frac{I(A=1)}{g(1|w)}$ is the inverse propensity score weighting for A = 1, and likewise $\frac{I(A=0)}{g(0|w)}$ is the inverse propensity score weighting for A = 0. The term in the middle is a ratio of the mediator density when A = 0 over the mediator density when A = 1.
+Breaking this down: $\frac{I(A=1)}{g(1|w)}$ is the inverse propensity score
+weighting for A = 1, and likewise $\frac{I(A=0)}{g(0|w)}$ is the inverse
+propensity score weighting for A = 0. The term in the middle is a ratio of the
+mediator density when A = 0 over the mediator density when A = 1.
 
-Therefore, it appears that we would need to estimate the density of our mediatiors Z which is computationally taxing and difficult when Z is high-dimensional. However, given that the ratio of these densities are required, we can in fact reparametrize this to be: 
+Therefore, it appears that we would need to estimate the density of our
+mediatiors Z which is computationally taxing and difficult when Z is
+high-dimensional. However, given that the ratio of these densities are required,
+we can in fact reparametrize this to be:
 
- $$\frac{p(A=0 | Z, W) g(0 | W) }{ p(A=1 | Z, W) g(1 | W) }$$
- This is useful because estimation of conditional means can be done using a library of machine learning tools. 
- 
-Underneath the hood of the NDE, we have a $\Psi_{NDE}$ estimation which are our predictions for $Q_{diff}$ as determined by W when A = 0 and our $e$ estimation which is the probability of A given Z and W which we use to construct the clever coefficient above. We call these nuisance parameters and once determined we then pass them to the TMLE step for final estimation. 
+$$\frac{p(A=0 | Z, W) g(0 | W) }{ p(A=1 | Z, W) g(1 | W) }$$
+This is useful because estimation of conditional means can be done using a
+library of machine learning tools.
 
-\textbf{The NIE is defined as:} 
+Underneath the hood of the NDE, we have a $\Psi_{NDE}$ estimation which are our
+predictions for $Q_{diff}$ as determined by W when A = 0 and our $e$ estimation
+which is the probability of A given Z and W which we use to construct the clever
+coefficient above. We call these nuisance parameters and once determined we then
+pass them to the TMLE step for final estimation.
 
-Derivation and estimation of the natural indirect parameter is analogous to the direct effect. Again, this is the effect of A on Y through a mediator Z. This quantity is known as the additive natural indirect effect $E(Y(1,Z(1)) - E(Y(1,Z(0))$ which means the expectation of Y given A = 1 and Z values when A = 1, minus the expectation of Y given A = 1 and Z values when A = 0.
+\textbf{The NIE is defined as:}
 
-As with the NDE, the reparameterization trick allows us to estimate $E(A | Z, W)$ rather than estimating a multivariate conditional density distribution. However now, our $\Psi_Z(Q)$ or mediated mean outcome difference is estimated as: 
+Derivation and estimation of the natural indirect parameter is analogous to the
+direct effect. Again, this is the effect of A on Y through a mediator Z. This
+quantity is known as the additive natural indirect effect $E(Y(1,Z(1)) -
+E(Y(1,Z(0))$ which means the expectation of Y given A = 1 and Z values when A =
+1, minus the expectation of Y given A = 1 and Z values when A = 0.
+
+As with the NDE, the reparameterization trick allows us to estimate $E(A | Z,
+W)$ rather than estimating a multivariate conditional density distribution.
+However now, our $\Psi_Z(Q)$ or mediated mean outcome difference is estimated
+as:
 
 $$\Psi_{NIE}(Q) = E_{QZ}(\psi_{NIE,Z}(Q)(W,1) - \psi_{NIE,Z}(Q)(W,0))$$
 
-In plain language, this uses the $\bar{Q}_Y(W,1, Z)$ or the predicted values for Y given W and Z when A = 1 and 'regresses' this vector on W among the treated to obtain the conditional mean $\Psi_{NIE,Z}(Q)(W,1)$. The same procedure is done, regressing Y given W and Z when A = 1 on W among the control observations, to obtain $\Psi_{NIE,Z}(Q)(W,0)$. The difference of these two estimates is the NIE and can be thought of as the additive marginal effect of treatment on the conditional expectation of Y given W, A  = 1, Z through its effects on Z. So in the case of the NIE our $\Psi$ estimate is slightly different but the $e$ used for the clever covariate is the same. 
-
+In plain language, this uses the $\bar{Q}_Y(W,1, Z)$ or the predicted values for
+Y given W and Z when A = 1 and 'regresses' this vector on W among the treated to
+obtain the conditional mean $\Psi_{NIE,Z}(Q)(W,1)$. The same procedure is done,
+regressing Y given W and Z when A = 1 on W among the control observations, to
+obtain $\Psi_{NIE,Z}(Q)(W,0)$. The difference of these two estimates is the NIE
+and can be thought of as the additive marginal effect of treatment on the
+conditional expectation of Y given W, A  = 1, Z through its effects on Z. So in
+the case of the NIE our $\Psi$ estimate is slightly different but the $e$ used
+for the clever covariate is the same.
 
 ## Targeted Maximum Likelihood
 
-With each nuisance parameter estimated using flexible machine learning algorithms we can use targeted maximum likelihood to obtain a targeted fit for both our NIE and NDE estimates. 
+With each nuisance parameter estimated using flexible machine learning
+algorithms we can use targeted maximum likelihood to obtain a targeted fit for
+both our NIE and NDE estimates.
 
-With targeted maximum likelihood estimation (TMLE), the portion of $P_0$ that the target parameter is a function of is estimated, this is done by utilizing additional components of $P_0$ outside of only $Q_y$ - which, as seen above is the only component to be used so far (for our $\Psi$ estimates). Because $Q_y$ is a more complicated estimate the variance and bias is 'spread' across our parameter space, TMLE is an additional step to help target our parameter of interest and reduce bias/variance for this parameter. The steps to TMLE for a standard average treatment effect are: 1. estimate $Q_y$ using flexible machine learning, 2. get predictions from the model for A = a and W = w, this is the initial prediction values for Y $\hat{Q}^0_n(A,W)$, 3. we then use clever covariates (like the ones described above) in a parametric sub-model through the initial fit of $\hat{Q}^0_n(A,W)$, and estimate the unknown parameter of this submodel (the coefficients) which represents the amount of fluctuation of the initial fit (amount of residual confounding). This is done by constructing a logistic regression flucuation model which has the true Y as outcome, offset by the initial estimates $\hat{Q}^0_n(A,W)$ and the clever coefficient as independent variable. Once fit, the coefficient is used to update the initial predictions $\hat{Q}^0_n(A,W)$ to make $\hat{Q}^1_n(A,W)$, if convergence to zero is not attained then this estimate $\hat{Q}^1_n(A,W)$ can be used in the next iteration of the logistic regression as an offset with Y as outcome and the clever coefficient to attain $\hat{Q}^2_n(A,W)$. Usually, convergence is made in one step however. At each step, the initial counterfactual estimates from the model are updated by: 
+With targeted maximum likelihood estimation (TMLE), the portion of $P_0$ that
+the target parameter is a function of is estimated, this is done by utilizing
+additional components of $P_0$ outside of only $Q_y$ - which, as seen above is
+the only component to be used so far (for our $\Psi$ estimates). Because $Q_y$
+is a more complicated estimate the variance and bias is 'spread' across our
+parameter space, TMLE is an additional step to help target our parameter of
+interest and reduce bias/variance for this parameter. The steps to TMLE for a
+standard average treatment effect are: 1. estimate $Q_y$ using flexible machine
+learning, 2. get predictions from the model for A = a and W = w, this is the
+initial prediction values for Y $\hat{Q}^0_n(A,W)$, 3. we then use clever
+covariates (like the ones described above) in a parametric sub-model through the
+initial fit of $\hat{Q}^0_n(A,W)$, and estimate the unknown parameter of this
+submodel (the coefficients) which represents the amount of fluctuation of the
+initial fit (amount of residual confounding). This is done by constructing a
+logistic regression flucuation model which has the true Y as outcome, offset by
+the initial estimates $\hat{Q}^0_n(A,W)$ and the clever coefficient as
+independent variable. Once fit, the coefficient is used to update the initial
+predictions $\hat{Q}^0_n(A,W)$ to make $\hat{Q}^1_n(A,W)$, if convergence to
+zero is not attained then this estimate $\hat{Q}^1_n(A,W)$ can be used in the
+next iteration of the logistic regression as an offset with Y as outcome and the
+clever coefficient to attain $\hat{Q}^2_n(A,W)$. Usually, convergence is made in
+one step however. At each step, the initial counterfactual estimates from the
+model are updated by:
 
 $$logit\bar{Q}^1_{n}(A,W) = logit\bar{Q}^0_n(A,W) + \epsilon_n H_n^*(A,W)$$
 $$logit\bar{Q}^1_{n}(1,W) = logit\bar{Q}^0_n(1,W) + \epsilon_n H_n^*(1,W)$$
-$$logit\bar{Q}^1_{n}(0,W) = logit\bar{Q}^0_n(0,W) + \epsilon_n H_n^*(0,W)$$, for all observations
+$$logit\bar{Q}^1_{n}(0,W) = logit\bar{Q}^0_n(0,W) + \epsilon_n H_n^*(0,W)$$,
+for all observations
 
-Until convergence ($\epsilon \sim 0$). Here, $\bar{Q}^0_n(1,W)$ and $\bar{Q}^0_n(0,W)$ are the initial counterfactual Y outcomes before updating, $H_n^*(1,W)$ is the clever covariate for treated observations (A =1) and $H_n^*(0,W)$ is the clever covariate for control cases (A=0) and $\epsilon$ is the coefficient from the logistic regression model. 
+Until convergence ($\epsilon \sim 0$). Here, $\bar{Q}^0_n(1,W)$ and
+$\bar{Q}^0_n(0,W)$ are the initial counterfactual Y outcomes before updating,
+$H_n^*(1,W)$ is the clever covariate for treated observations (A =1) and
+$H_n^*(0,W)$ is the clever covariate for control cases (A=0) and $\epsilon$ is
+the coefficient from the logistic regression model.
 
-For the NIE and NDE, the same procedure is conducted however our updated estimates, $logit\bar{Q}^*_{n}(A,W)$, $logit\bar{Q}^*_{n}(1,W)$, and $logit\bar{Q}^*_{n}(0,W)$ back-propogate to our $\Psi_{NDE}$ and $\Psi_{NIE}$ estimates. So, for example, after our first TMLE fit, the difference between $logit\bar{Q}^1_{n}(1,W)$ and $logit\bar{Q}^1_{n}(0,W)$ now become $Q_{diff}$ which is then regressed on W where A = 0 to obtain our updated $\Psi_{NDE}$. Likewise, $logit\bar{Q}^1_{n}(1,W)$ is passed back to our $\Psi_{NIE}$ and used as the outcome when regressing on W when A = 1, and W when A = 0, as described above. Note, here we use the term regressing to mean estimating using flexible machine learning algorithms. 
-
+For the NIE and NDE, the same procedure is conducted however our updated
+estimates, $logit\bar{Q}^*_{n}(A,W)$, $logit\bar{Q}^*_{n}(1,W)$, and
+$logit\bar{Q}^*_{n}(0,W)$ back-propogate to our $\Psi_{NDE}$ and $\Psi_{NIE}$
+estimates. So, for example, after our first TMLE fit, the difference between
+$logit\bar{Q}^1_{n}(1,W)$ and $logit\bar{Q}^1_{n}(0,W)$ now become $Q_{diff}$
+which is then regressed on W where A = 0 to obtain our updated $\Psi_{NDE}$.
+Likewise, $logit\bar{Q}^1_{n}(1,W)$ is passed back to our $\Psi_{NIE}$ and used
+as the outcome when regressing on W when A = 1, and W when A = 0, as described
+above. Note, here we use the term regressing to mean estimating using flexible
+machine learning algorithms.
 
 ## Estimating the Natural Indirect Effect
 
-Now we can calculate the NIE by creating a spec object which gives instructions on which learners to use for our nuisance parameters $e$ and $\psi_z$
-We then provide tmle3 with our spec object, the data, the node list we created above, and a learner list that tells the software which learners to use for estimating A and Y.
+Now we can calculate the NIE by creating a spec object which gives instructions
+on which learners to use for our nuisance parameters $e$ and $\psi_z$. We then
+provide `tmle3` with our spec object, the data, the node list we created above,
+and a learner list that tells the software which learners to use for estimating
+A and Y.
 
 ```{r NIE,message=FALSE, warning=FALSE}
 tmle_spec_NIE <- tmle_NIE(
@@ -214,10 +294,12 @@ tmle_spec_NIE <- tmle_NIE(
   max_iter = 100
 )
 
-weight_behavior_NIE <- tmle3(tmle_spec_NIE, weight_behavior_complete, node_list, learner_list)
+weight_behavior_NIE <- tmle3(tmle_spec_NIE, weight_behavior_complete,
+                             node_list, learner_list)
 print(weight_behavior_NIE)
 ```
-We can pull out our TMLE estimate for the NIE by doing: 
+
+We can pull out our TMLE estimate for the NIE by doing:
 
 ```{r tmle_est}
 weight_behavior_NIE$summary$tmle_est
@@ -225,24 +307,25 @@ weight_behavior_NIE$summary$tmle_est
 
 ## Estimating the Natural Direct Effect
 
-The same procedure is done to get the natural direct effect but we use the tmle_spec_NDE to define the learners that will measure the NDE parameters: 
+The same procedure is done to get the natural direct effect but we use the
+tmle_spec_NDE to define the learners that will measure the NDE parameters:
 
 ```{r NDE, message=FALSE, warning=FALSE}
-
 tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
   max_iter = 100
 )
 
-weight_behavior_NDE <- tmle3(tmle_spec_NDE, weight_behavior_complete, node_list, learner_list)
+weight_behavior_NDE <- tmle3(tmle_spec_NDE, weight_behavior_complete,
+                             node_list, learner_list)
 weight_behavior_NDE <- weight_behavior_NDE$summary
 
 print(weight_behavior_NDE)
-
 ```
 
-Let's check out what MMA looks like for this sports behavior -> BMI data set as mediated by these same three covariates: 
+Let's check out what MMA looks like for this sports behavior -> BMI data set as
+mediated by these same three covariates:
 
 ```{r mma_weight_mediation, message=FALSE, warning=FALSE}
 x=weight_behavior_complete[,c(2:11,13:15)]
@@ -277,20 +360,18 @@ mma_mart_weight <-mma(x,
               nonlinear=TRUE)
 
 print(mma_mart_weight)
-
-
 ```
 
-Now let's generate some simulated data where we know the truth and compare our results using tmle3mediate to the mma package where we got the previous data from: 
+Now let's generate some simulated data where we know the truth and compare our
+results using tmle3mediate to the mma package where we got the previous data
+from:
 
 ```{r gen_data}
 data_sim <- sim_data(n_obs = 2000)
 head(data_sim)
 ```
 
- 
 ```{r fit_tmle3mediate_sim}
-
 node_list <- list(
   W = c("W1", "W2", "W3"),
   A = "A",
@@ -317,7 +398,7 @@ tmle_spec_NDE <- tmle_NDE(
 NDE_est <- tmle3(tmle_spec_NDE, data_sim, node_list, learner_list)
 ```
 
-Let's use mma to find the NDE and NIE on the same simulated data: 
+Let's use mma to find the NDE and NIE on the same simulated data:
 
 ```{r mma, message=FALSE, warning=FALSE}
 
@@ -326,42 +407,267 @@ pred=data.frame(data_sim[,4])
 y=data.frame(data_sim[,8])
 colnames(y)="Y"
 
-mma_glm<-mma(x,
-             y,
-             pred=pred,
-             mediator=c(4:6),
-             jointm=list(n=1,j1=c(4:6)),
-             predref=0,
-             alpha=0.4,
-             alpha2=0.4,
-             n2=20,
-             nonlinear=FALSE)
-
+mma_glm <- mma(x,
+               y,
+               pred=pred,
+               mediator=c(4:6),
+               jointm=list(n=1,j1=c(4:6)),
+               predref=0,
+               alpha=0.4,
+               alpha2=0.4,
+               n2=20,
+               nonlinear=FALSE)
 print(mma_glm)
 
 
-mma_mart<-mma(x,
-             y,
-             pred=pred,
-             mediator=c(4:6),
-             jointm=list(n=1,j1=c(4:6)),
-             predref=0,
-             alpha=0.4,
-             alpha2=0.4,
-             n2=1,
-             nonlinear=TRUE)
-
+mma_mart <- mma(x,
+               y,
+               pred=pred,
+               mediator=c(4:6),
+               jointm=list(n=1,j1=c(4:6)),
+               predref=0,
+               alpha=0.4,
+               alpha2=0.4,
+               n2=1,
+               nonlinear=TRUE)
 print(mma_glm)
-
-
-
-
 ```
 
+# Background
 
+We are interested in assessing the population intervention direct effect and
+the population intervention indirect effect, based on the effect decomposition
+of the population intervention effect introduced in @diaz2020causal.
 
+To proceed, we'll use as our running example a simple data set from an
+observational study of the relationship between BMI and kids behavior,
+distributed as part of the [`mma` R package on
+CRAN](https://CRAN.R-project.org/package=mma). First, let's load the packages
+we'll be using and set a seed; then, load this data set and take a quick look
+at it
 
+```{r load_data, message=FALSE, warning=FALSE}
+# preliminaries
+library(data.table)
+library(dplyr)
+library(sl3)
+library(medshift)
+library(mma)
+set.seed(429153)
 
+# load and examine data
+data(weight_behavior)
+dim(weight_behavior)
+head(weight_behavior)
+```
+
+The documentation for the data set describes it as a "database obtained from the
+Louisiana State University Health Sciences Center, New Orleans, by  Dr. Richard
+Scribner. He  explored the relationship  between BMI and kids behavior through a
+survey at children, teachers and parents in Grenada in 2014. This data set
+includes 691 observations and 15 variables."
+
+Unfortunately, the data set contains a few observations with missing values. As
+these are unrelated to the object of our analysis, we'll simply remove these for
+the time being. Note that in a real data analysis, we might consider strategies
+to fully make of the observed data, perhaps by imputing missing values. For now,
+we simply remove the incomplete observations, resulting in a data set with fewer
+observations but much the same structure as the original:
+
+```{r remove_na, echo=FALSE, message=FALSE, warning=FALSE}
+# remove missing values
+is_na <- unique(do.call(c, apply(apply(weight_behavior, 2, is.na), 2, which)))
+weight_behavior_complete <- weight_behavior[-is_na, ]
+weight_behavior_complete$sports <-
+  as.numeric(weight_behavior_complete$sports) - 1
+dim(weight_behavior_complete)
+head(weight_behavior_complete)
+```
+
+For the analysis of this observational data set, we focus on the effect of
+participating in a sports team (`sports`) on the BMI of children (`bmi`), taking
+several related covariates as mediators (`snack`, `exercises`, `overweigh`) and
+all other collected covariates as potential confounders. Considering an NPSEM,
+we separate the observed variables from the data set into their corresponding
+nodes as follows
+
+```{r npsem, message=FALSE, warning=FALSE}
+Y <- weight_behavior_complete$bmi
+A <- weight_behavior_complete$sports
+Z <- weight_behavior_complete %>%
+  select(snack, exercises, overweigh)
+W <- weight_behavior_complete %>%
+  select(age, sex, race, numpeople, car, gotosch, tvhours, cmpthours,
+         cellhours, sweat)
+```
+
+Finally, in our analysis, we consider an incremental propensity score
+intervention (IPSI), as first proposed by @kennedy2017nonparametric, wherein the
+_odds of participating in a sports team_ is modulated by some fixed amount
+($0 \leq \delta \leq \infty$) for each individual. Such an intervention may be
+interpreted as the effect of a school program that motivates children to
+participate in sports teams. To exemplify our approach, we postulate a
+motivational intervention that _triples the odds_ of participating in a sports
+team for each individual:
+
+```{r delta_ipsi, message=FALSE, warning=FALSE}
+delta_shift_ipsi <- 3
+```
+
+To easily incorporate ensemble machine learning into the estimation procedure,
+we rely on the facilities provided in the [`sl3` R
+package](https://tlverse.org/sl3) [@coyle2020sl3]. For a complete guide on using
+the `sl3` R package, consider consulting https://tlverse.org/sl3, or
+https://tlverse.org (and https://github.com/tlverse) for the `tlverse`
+ecosystem, of which `sl3` is a major part. We construct an ensemble learner
+using a handful of popular machine learning algorithms below
+
+```{r make_sl, message=FALSE, warning=FALSE}
+# SL learners used for continuous data (the nuisance parameter M)
+xgb_contin_lrnr <- Lrnr_xgboost$new(nrounds = 50, objective = "reg:linear")
+enet_contin_lrnr <- Lrnr_glmnet$new(alpha = 0.5, family = "gaussian",
+                                    nfolds = 3)
+lasso_contin_lrnr <- Lrnr_glmnet$new(alpha = 1, family = "gaussian",
+                                     nfolds = 3)
+fglm_contin_lrnr <- Lrnr_glm_fast$new(family = gaussian())
+contin_lrnr_lib <- Stack$new(enet_contin_lrnr, lasso_contin_lrnr,
+                             fglm_contin_lrnr, xgb_contin_lrnr)
+sl_contin_lrnr <- Lrnr_sl$new(learners = contin_lrnr_lib,
+                              metalearner = Lrnr_nnls$new())
+
+# SL learners used for binary data (nuisance parameters G and E in this case)
+xgb_binary_lrnr <- Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic")
+enet_binary_lrnr <- Lrnr_glmnet$new(alpha = 0.5, family = "binomial",
+                                    nfolds = 3)
+lasso_binary_lrnr <- Lrnr_glmnet$new(alpha = 1, family = "binomial",
+                                     nfolds = 3)
+fglm_binary_lrnr <- Lrnr_glm_fast$new(family = binomial())
+binary_lrnr_lib <- Stack$new(enet_binary_lrnr, lasso_binary_lrnr,
+                             fglm_binary_lrnr, xgb_binary_lrnr)
+logistic_metalearner <- make_learner(Lrnr_solnp,
+                                     metalearner_logistic_binomial,
+                                     loss_loglik_binomial)
+sl_binary_lrnr <- Lrnr_sl$new(learners = binary_lrnr_lib,
+                              metalearner = logistic_metalearner)
+```
+
+## Decomposing the population intervention effect
+
+We may decompose the population intervention effect (PIE) in terms of a
+_population intervention direct effect_ (PIDE) and a _population
+intervention indirect effect_ (PIIE):
+\begin{equation*}
+  \overbrace{\mathbb{E}\{Y(A_\delta, Z(A_\delta)) -
+    Y(A_\delta, Z)\}}^{\text{PIIE}} +
+    \overbrace{\mathbb{E}\{Y(A_\delta, Z) - Y(A, Z)\}}^{\text{PIDE}}.
+\end{equation*}
+
+This decomposition of the PIE as the sum of the population intervention direct
+and indirect effects has an interpretation analogous to the corresponding
+standard decomposition of the average treatment effect. In the sequel, we will
+compute each of the components of the direct and indirect effects above using
+appropriate estimators as follows
+
+* For $\mathbb{E}\{Y(A, Z)\}$, the sample mean $\frac{1}{n}\sum_{i=1}^n Y_i$ is
+  sufficient;
+* for $\mathbb{E}\{Y(A_{\delta}, Z)\}$, an efficient one-step estimator for the
+  effect of a joint intervention altering the exposure mechanism but not the
+  mediation mechanism, as proposed in @diaz2020causal; and,
+* for $\mathbb{E}\{Y(A_{\delta}, Z_{A_{\delta}})\}$, an efficient one-step
+  estimator for the effect of a joint intervention altering both the exposure
+  and mediation mechanisms, as proposed in @kennedy2017nonparametric and
+  implemented in the [`npcausal` R
+  package](https://github.com/ehkennedy/npcausal).
+
+## Estimating the effect decomposition term
+
+As given in @diaz2020causal, the statistical functional identifying the
+decomposition term that appears in both the PIDE and PIIE
+$\mathbb{E}\{Y(A_{\delta}, Z)\}$, which corresponds to altering the exposure
+mechanism while keeping the mediation mechanism fixed, is
+\begin{equation*}
+  \theta_0(\delta) = \int m_0(a, z, w) g_{0,\delta}(a \mid w) p_0(z, w)
+    d\nu(a, z, w),
+\end{equation*}
+for which a one-step estimator is available. The corresponding _efficient
+influence function_ (EIF) with respect to the nonparametric model $\mathcal{M}$
+is $D_{\eta,\delta}(o) = D^Y_{\eta,\delta}(o)
++ D^A_{\eta,\delta}(o) + D^{Z,W}_{\eta,\delta}(o) - \theta(\delta)$. The
+one-step estimator may be computed using the EIF estimating equation, making use
+of cross-fitting [@zheng2011cross; @chernozhukov2018double] to circumvent any
+need for entropy conditions (i.e., Donsker class restrictions). The resultant
+estimator is
+\begin{equation*}
+  \hat{\theta}(\delta) = \frac{1}{n} \sum_{i = 1}^n D_{\hat{\eta}_{j(i)},
+  \delta}(O_i) = \frac{1}{n} \sum_{i = 1}^n \left\{ D^Y_{\hat{\eta}_{j(i)},
+  \delta}(O_i) + D^A_{\hat{\eta}_{j(i)}, \delta}(O_i) +
+  D^{Z,W}_{\hat{\eta}_{j(i)}, \delta}(O_i) \right\},
+\end{equation*}
+which is implemented in the `medshift` R package. We make use of that
+implementation to estimate $\mathbb{E}\{Y(A_{\delta}, Z)\}$ via its one-step
+estimator $\hat{\theta}(\delta)$ below
+
+```{r efficient_est, message=FALSE, warning=FALSE}
+# let's compute the parameter where A (but not Z) are shifted
+theta_eff <- medshift(W = W, A = A, Z = Z, Y = Y,
+                      delta = delta_shift_ipsi,
+                      g_learners = sl_binary_lrnr,
+                      e_learners = sl_binary_lrnr,
+                      m_learners = sl_contin_lrnr,
+                      phi_learners = Lrnr_hal9001$new(),
+                      estimator = "onestep",
+                      estimator_args = list(cv_folds = 3))
+summary(theta_eff)
+```
+
+## Estimating the direct effect
+
+Recall that, based on the decomposition outlined previously, the population
+intervention direct effect may be denoted $\beta_{\text{PIDE}}(\delta) =
+\theta_0(\delta) - \mathbb{E}Y$. Thus, an estimator of the PIDE,
+$\hat{\beta}_{\text{PIDE}}(\delta)$ may be expressed as a composition of
+estimators of its constituent parameters:
+\begin{equation*}
+  \hat{\beta}_{\text{PIDE}}({\delta}) = \hat{\theta}(\delta) -
+  \frac{1}{n} \sum_{i = 1}^n Y_i.
+\end{equation*}
+
+Based on the above, we may construct an estimator of the PIDE using quantities
+already computed. The convenience function below applies the simple delta method
+required in the case of a linear contrast between the two constituent
+parameters:
+```{r linear_contrast_delta, message=FALSE, warning=FALSE}
+# convenience function to compute inference via delta method: EY1 - EY0
+linear_contrast <- function(params, eifs, ci_level = 0.95) {
+  # bounds for confidence interval
+  ci_norm_bounds <- c(-1, 1) * abs(stats::qnorm(p = (1 - ci_level) / 2))
+  param_est <- params[[1]] - params[[2]]
+  eif <- eifs[[1]] - eifs[[2]]
+  se_eif <- sqrt(var(eif) / length(eif))
+  param_ci <- param_est + ci_norm_bounds * se_eif
+  # parameter and inference
+  out <- c(param_ci[1], param_est, param_ci[2])
+  names(out) <- c("lwr_ci", "param_est", "upr_ci")
+  return(out)
+}
+```
+
+With the above convenience function in hand, we'll construct or extract the
+necessary components from existing objects and simply apply the function:
+```{r comp_de_binary, message=FALSE, warning=FALSE}
+# parameter estimates and EIFs for components of direct effect
+EY <- mean(Y)
+eif_EY <- Y - EY
+params_de <- list(theta_eff$theta, EY)
+eifs_de <- list(theta_eff$eif, eif_EY)
+
+# direct effect = EY - estimated quantity
+de_est <- linear_contrast(params_de, eifs_de)
+de_est
+```
+
+As given above, we have for our estimate of the direct effect
+$\hat{\beta}_{\text{PIDE}}({\delta}) =$ `r round(de_est[2], 3)`.
 
 ## References
 

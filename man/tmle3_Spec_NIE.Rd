@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmle3_Spec_NIE.R
 \name{tmle3_Spec_NIE}
 \alias{tmle3_Spec_NIE}
-\title{Defines a TML Estimator for the Natural Indirect Effect}
+\title{TML Estimator for the Natural Indirect Effect}
 \description{
-Defines a TML Estimator for the Natural Indirect Effect
+TML Estimator for the Natural Indirect Effect
 }
