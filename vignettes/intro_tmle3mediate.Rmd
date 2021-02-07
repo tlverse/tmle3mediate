@@ -1,8 +1,8 @@
 ---
 title: "Targeted Learning for Causal Mediation Analysis"
-author: "[James Duncan](https://statistics.berkeley.edu/people/james-duncan)
-  [David McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html) and
-  [Nima Hejazi](https://nimahejazi.org)"
+author: "[Nima Hejazi](https://nimahejazi.org), [James
+  Duncan](https://statistics.berkeley.edu/people/james-duncan), and
+  [David McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html)"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: ../inst/REFERENCES.bib
@@ -79,7 +79,6 @@ outcome <- "bmi"
 mediators <- c("snack", "exercises", "overweigh")
 covars <- setdiff(colnames(weight_behavior_complete),
                   c(exposure, outcome, mediators))
-
 node_list <- list(
   W = covars,
   A = exposure,
@@ -103,40 +102,27 @@ or https://tlverse.org (and https://github.com/tlverse) for the `tlverse`
 ecosystem. We construct an ensemble learner using a handful of popular machine
 learning algorithms below:
 
-```{r make_sl, message=FALSE, warning=FALSE}
-# SL learners used for continuous data (the nuisance parameter M)
-hal_lrnr <- Lrnr_hal9001$new(max_degree = NULL,
-                             n_folds = 5,
-                             fit_type = "glmnet",
-                             use_min = TRUE,
-                             type.measure = "deviance",
-                             standardize = FALSE,
-                             family = "gaussian",
-                             lambda.min.ratio = 1 / nrow(data),
-                             nlambda = 500,
-                             yolo = FALSE)
-
-hal_contin_lrnr <- Lrnr_hal9001$new(
-  fit_type = "glmnet", n_folds = 5
+```{r make_hal_learners, message=FALSE, warning=FALSE}
+# HAL learners used for nuisance parameter estimation, with cross-validation
+hal_contin_learner <- Lrnr_hal9001$new(
+  max_degree = 5, fit_type = "glmnet", n_folds = 5
 )
-hal_binary_lrnr <- Lrnr_hal9001$new(
-  fit_type = "glmnet", n_folds = 5,
-  family = "binomial"
+hal_binary_learner <- Lrnr_hal9001$new(
+  max_degree = 5, fit_type = "glmnet", n_folds = 5, family = "binomial"
 )
+cv_hal_contin_learner <- Lrnr_cv$new(hal_contin_learner, full_fit = TRUE)
+cv_hal_binary_learner <- Lrnr_cv$new(hal_binary_learner, full_fit = TRUE)
 
-cv_hal_contin_lrnr <- Lrnr_cv$new(hal_contin_lrnr, full_fit = TRUE)
-cv_hal_binary_lrnr <- Lrnr_cv$new(hal_binary_lrnr, full_fit = TRUE)
-
+# create learner list
 learner_list <- list(
-  Y = cv_hal_contin_lrnr,
-  A = cv_hal_binary_lrnr
+  Y = cv_hal_contin_learner,
+  A = cv_hal_binary_learner
 )
 ```
 
 ## Decomposing the Average Treatment Effect
 
-The natural direct and indirect effects are obtained by a decomposition of the
-ATE:
+The natural direct and indirect effects arise from a decomposition of the ATE:
 \begin{equation*}
   \mathbb{E}[Y(1) - Y(0)] =
     \underbrace{\mathbb{E}[Y(1, Z(0)) - Y(0, Z(0))]}_{NDE} +
@@ -171,7 +157,6 @@ $Q_{diff}$ we can remove part of the marginal impact of Z on $Q_{diff}$. Any
 residual additive effect of Z on $Q_{diff}$ is removed during the TMLE step
 using the mediator clever covariate.
 
-
 The clever covariate for this estimate is defined as:
 $$C_Y(Q_Z,g)(O) = \Bigg\{\frac{\mathbb{I}(A = 1)}{g(1 \mid w)}
   \frac{Q_Z(Z \mid W, 0)}{Q_Z(Z \mid W, 1)} -
@@ -187,7 +172,7 @@ Therefore, it appears that we would need to estimate the density of our
 mediatiors $Z$ which is computationally taxing and difficult when $Z$ is
 high-dimensional. However, given that the ratio of these densities are required,
 we can in fact reparametrize this to be:
-$$\frac{p(A = 0 \mid Z, W) g(0 \mid W) }{ p(A = 1 \mid Z, W) g(1 \mid W)}$$
+$$\frac{p(A = 0 \mid Z, W) g(0 \mid W)}{ p(A = 1 \mid Z, W) g(1 \mid W)}$$
 This is useful because estimation of conditional means can be done using a
 library of machine learning tools.
 
@@ -206,8 +191,8 @@ E(Y(1,Z(0))$ which means the expectation of $Y$ given $A = 1$ and $Z$ values
 when $A = 1$, minus the expectation of $Y$ given $A = 1$ and $Z$ values when
 $A = 0$.
 
-As with the NDE, the reparameterization trick allows us to estimate $E(A \mid Z,
-W)$ rather than estimating a multivariate conditional density distribution.
+As with the NDE, the reparameterization trick allows us to estimate $E(A \mid
+Z, W)$ rather than estimating a multivariate conditional density distribution.
 However now, our $\Psi_Z(Q)$ or mediated mean outcome difference is estimated
 as:
 $$\Psi_{NIE}(Q) = E_{QZ}(\psi_{NIE,Z}(Q)(W,1) - \psi_{NIE,Z}(Q)(W,0))$$
@@ -237,10 +222,10 @@ parameter space, TMLE is an additional step to help target our parameter of
 interest and reduce bias/variance for this parameter. The steps to TMLE for a
 standard average treatment effect are:
 
-1. estimate $Q_y$ using flexible machine learning,
-2. get predictions from the model for A = a and W = w, this is the initial
+1. Estimate $Q_y$ using flexible machine learning,
+2. Get predictions from the model for A = a and W = w, this is the initial
    prediction values for Y $\hat{Q}^0_n(A,W)$,
-3. we then use clever covariates (like the ones described above) in a parametric
+3. We then use clever covariates (like the ones described above) in a parametric
    sub-model through the initial fit of $\hat{Q}^0_n(A,W)$, and estimate the
    unknown parameter of this submodel (the coefficients) which represents the
    amount of fluctuation of the initial fit (amount of residual confounding).
@@ -287,15 +272,15 @@ provide `tmle3` with our Spec object, the data, the node list we created above,
 and a learner list that tells the software which learners to use for estimating
 $A$ and $Y$.
 
-```{r NIE,message=FALSE, warning=FALSE}
+```{r NIE, message=FALSE, warning=FALSE}
 tmle_spec_NIE <- tmle_NIE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100
+  max_iter = 10
 )
-
-weight_behavior_NIE <- tmle3(tmle_spec_NIE, weight_behavior_complete,
-                             node_list, learner_list)
+weight_behavior_NIE <- tmle3(
+  tmle_spec_NIE, weight_behavior_complete, node_list, learner_list
+)
 print(weight_behavior_NIE)
 ```
 
@@ -313,11 +298,11 @@ The same procedure is done to get the natural direct effect but we use the
 tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100
+  max_iter = 10
 )
-
-weight_behavior_NDE <- tmle3(tmle_spec_NDE, weight_behavior_complete,
-                             node_list, learner_list)
+weight_behavior_NDE <- tmle3(
+  tmle_spec_NDE, weight_behavior_complete, node_list, learner_list
+)
 weight_behavior_NDE <- weight_behavior_NDE$summary
 print(weight_behavior_NDE)
 ```
@@ -366,14 +351,14 @@ learner_list <- list(
 tmle_spec_NIE <- tmle_NIE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100
+  max_iter = 10
 )
 NIE_est <- tmle3(tmle_spec_NIE, data_sim, node_list, learner_list)
 
 tmle_spec_NDE <- tmle_NDE(
   e_learners = cv_hal_binary_lrnr,
   psi_Z_learners = cv_hal_contin_lrnr,
-  max_iter = 100
+  max_iter = 10
 )
 NDE_est <- tmle3(tmle_spec_NDE, data_sim, node_list, learner_list)
 ```
@@ -421,7 +406,7 @@ motivational intervention that _triples the odds_ of participating in a sports
 team for each individual:
 
 ```{r delta_ipsi, message=FALSE, warning=FALSE}
-delta_shift_ipsi <- 3
+delta_shift_ipsi <- 2
 ```
 
 To easily incorporate ensemble machine learning into the estimation procedure,
@@ -432,28 +417,32 @@ https://tlverse.org (and https://github.com/tlverse) for the `tlverse`
 ecosystem, of which `sl3` is a major part. We construct an ensemble learner
 using a handful of popular machine learning algorithms below
 
-```{r make_sl, message=FALSE, warning=FALSE}
+```{r make_sl_learners, message=FALSE, warning=FALSE}
 # SL learners used for continuous data (the nuisance parameter M)
-xgb_contin_lrnr <- Lrnr_xgboost$new(nrounds = 50, objective = "reg:linear")
-enet_contin_lrnr <- Lrnr_glmnet$new(alpha = 0.5, family = "gaussian",
-                                    nfolds = 3)
-lasso_contin_lrnr <- Lrnr_glmnet$new(alpha = 1, family = "gaussian",
-                                     nfolds = 3)
+enet_contin_lrnr <- Lrnr_glmnet$new(
+  alpha = 0.5, family = "gaussian", nfolds = 3
+)
+lasso_contin_lrnr <- Lrnr_glmnet$new(
+  alpha = 1, family = "gaussian", nfolds = 3
+)
 fglm_contin_lrnr <- Lrnr_glm_fast$new(family = gaussian())
-contin_lrnr_lib <- Stack$new(enet_contin_lrnr, lasso_contin_lrnr,
-                             fglm_contin_lrnr, xgb_contin_lrnr)
+contin_lrnr_lib <- Stack$new(
+  enet_contin_lrnr, lasso_contin_lrnr, fglm_contin_lrnr
+)
 sl_contin_lrnr <- Lrnr_sl$new(learners = contin_lrnr_lib,
                               metalearner = Lrnr_nnls$new())
 
 # SL learners used for binary data (nuisance parameters G and E in this case)
-xgb_binary_lrnr <- Lrnr_xgboost$new(nrounds = 50, objective = "reg:logistic")
-enet_binary_lrnr <- Lrnr_glmnet$new(alpha = 0.5, family = "binomial",
-                                    nfolds = 3)
-lasso_binary_lrnr <- Lrnr_glmnet$new(alpha = 1, family = "binomial",
-                                     nfolds = 3)
+enet_binary_lrnr <- Lrnr_glmnet$new(
+  alpha = 0.5, family = "binomial", nfolds = 3
+)
+lasso_binary_lrnr <- Lrnr_glmnet$new(
+  alpha = 1, family = "binomial", nfolds = 3
+)
 fglm_binary_lrnr <- Lrnr_glm_fast$new(family = binomial())
-binary_lrnr_lib <- Stack$new(enet_binary_lrnr, lasso_binary_lrnr,
-                             fglm_binary_lrnr, xgb_binary_lrnr)
+binary_lrnr_lib <- Stack$new(
+  enet_binary_lrnr, lasso_binary_lrnr, fglm_binary_lrnr
+)
 logistic_metalearner <- make_learner(Lrnr_solnp,
                                      metalearner_logistic_binomial,
                                      loss_loglik_binomial)

@@ -17,8 +17,10 @@ v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/
 
 > Targeted Learning for Causal Mediation Analysis
 
-**Authors:** [Nima Hejaz](https://nimahejazi.org), James Duncan, David
-McCoy, and [Mark van der Laan](https://vanderlaan-lab.org)
+**Authors:** [Nima Hejazi](https://nimahejazi.org), [James
+Duncan](https://statistics.berkeley.edu/people/james-duncan), [David
+McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html), and [Mark van
+der Laan](https://vanderlaan-lab.org)
 
 -----
 
@@ -27,19 +29,18 @@ McCoy, and [Mark van der Laan](https://vanderlaan-lab.org)
 `tmle3mediate` is an adapter/extension R package in the `tlverse`
 ecosystem that provides support for *causal mediation analysis*, for a
 range of target parameters applicable in settings with mediating
-variables. Causal effects for which estimation machinery are provided
-include the controlled direct effect (Petersen, Sinisi, and van der Laan
-2006; Didelez, Dawid, and Geneletti 2012; VanderWeele 2015), the natural
-(in)direct effects (Robins and Greenland 1992; Zheng and van der Laan
-2012), and the population intervention (in)direct effects (Dı́az and
-Hejazi 2020). By building on the core `tlverse` grammar exposed by the
-`tmle3` R package, `tmle3mediate` accommodates targeted maximum
-likelihood (or targeted minimum loss-based) estimation of these causal
-effect parameters through a unified interface. For a general discussion
-of the framework of targeted minimum loss-based estimation and its
-relationship to statistical causal inference, the motivated reader may
-consider consulting van der Laan and Rose (2011) and van der Laan and
-Rose (2018). A practical and accessible introduction using the `tlverse`
+variables. Causal effects for which estimation machinery is provided
+include the popular natural (in)direct effects (Robins and Greenland
+1992; Zheng and van der Laan 2012; VanderWeele 2015), and the less
+restrictive population intervention (in)direct effects (Dı́az and Hejazi
+2020). By building on the core `tlverse` grammar exposed by the `tmle3`
+R package, `tmle3mediate` accommodates targeted maximum likelihood (or
+targeted minimum loss-based) estimation of these causal effect
+parameters through a unified interface. For a general discussion of the
+framework of targeted minimum loss-based estimation and its relationship
+to statistical causal inference, the motivated reader may consider
+consulting van der Laan and Rose (2011) and van der Laan and Rose
+(2018). A practical and accessible introduction using the `tlverse`
 software ecosystem is provided in van der Laan et al. (2021) (see
 <https://tlverse.org/tlverse-handbook>).
 
@@ -190,14 +191,6 @@ See file `LICENSE` for details.
 
 <div id="refs" class="references">
 
-<div id="ref-didelez2012direct">
-
-Didelez, Vanessa, Philip Dawid, and Sara Geneletti. 2012. “Direct and
-Indirect Effects of Sequential Treatments.” *arXiv Preprint
-arXiv:1206.6840*.
-
-</div>
-
 <div id="ref-diaz2020causal">
 
 Dı́az, Iván, and Nima S Hejazi. 2020. “Causal Mediation Analysis for
@@ -212,13 +205,6 @@ Series B (Statistical Methodology)* 82 (3): 661–83.
 Dı́az, Iván, Nima S Hejazi, Kara E Rudolph, and Mark J van der Laan.
 2020. “Non-Parametric Efficient Causal Mediation with Intermediate
 Confounders.” *Biometrika*. <https://doi.org/10.1093/biomet/asaa085>.
-
-</div>
-
-<div id="ref-petersen2006estimation">
-
-Petersen, Maya L, Sandra E Sinisi, and Mark J van der Laan. 2006.
-“Estimation of Direct Causal Effects.” *Epidemiology*, 276–84.
 
 </div>
 

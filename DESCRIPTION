@@ -1,6 +1,6 @@
 Package: tmle3mediate
 Title: Targeted Learning for Causal Mediation Analysis
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: c(
     person("Nima", "Hejazi", email = "nh@nimahejazi.org",
            role = c("aut", "cre", "cph"),
@@ -15,10 +15,11 @@ Authors@R: c(
   )
 Maintainer: Nima Hejazi <nh@nimahejazi.org>
 Description: Targeted maximum likelihood (TML) estimation of population-level
-    causal mediation effects defined by static or stochastic interventions. The
-    causal effects for which targeted doubly robust estimators are provided
-    include the controlled direct effect, the natural (in)direct effects, and
-    the population intervention (in)direct effects.
+    causal effects in mediation analysis. The causal effects are defined by
+    joint static or stochastic interventions applied to the exposure and the
+    mediator. Targeted doubly robust estimators are provided for the classical
+    natural direct and indirect effects, as well as the more recently developed
+    population intervention direct and indirect effects.
 Depends: R (>= 3.4.0)
 Imports:
     R6,

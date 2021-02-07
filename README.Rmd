@@ -24,8 +24,10 @@ knitr::opts_chunk$set(
 
 > Targeted Learning for Causal Mediation Analysis
 
-__Authors:__ [Nima Hejaz](https://nimahejazi.org), James Duncan, David McCoy,
-and [Mark van der Laan](https://vanderlaan-lab.org)
+__Authors:__ [Nima Hejazi](https://nimahejazi.org), [James
+Duncan](https://statistics.berkeley.edu/people/james-duncan), [David
+McCoy](http://bbd.berkeley.edu/cohort-4-2019-2020.html), and [Mark van der
+Laan](https://vanderlaan-lab.org)
 
 ---
 
@@ -34,18 +36,18 @@ and [Mark van der Laan](https://vanderlaan-lab.org)
 `tmle3mediate` is an adapter/extension R package in the `tlverse` ecosystem that
 provides support for _causal mediation analysis_, for a range of target
 parameters applicable in settings with mediating variables. Causal effects for
-which estimation machinery are provided include the controlled direct effect
-[@petersen2006estimation; @didelez2012direct; @vanderweele2015explanation], the
-natural (in)direct effects [@robins1992identifiability; @zheng2012targeted], and
-the population intervention (in)direct effects [@diaz2020causal]. By building on
-the core `tlverse` grammar exposed by the `tmle3` R package, `tmle3mediate`
-accommodates targeted maximum likelihood (or targeted minimum loss-based)
-estimation of these causal effect parameters through a unified interface. For a
-general discussion of the framework of targeted minimum loss-based estimation
-and its relationship to statistical causal inference, the motivated reader may
-consider consulting @vdl2011targeted and @vdl2018targeted. A practical and
-accessible introduction using the `tlverse` software ecosystem is provided in
-@vdl2021targeted (see https://tlverse.org/tlverse-handbook).
+which estimation machinery is provided include the popular natural (in)direct
+effects [@robins1992identifiability; @zheng2012targeted;
+@vanderweele2015explanation], and the less restrictive population intervention
+(in)direct effects [@diaz2020causal]. By building on the core `tlverse` grammar
+exposed by the `tmle3` R package, `tmle3mediate` accommodates targeted maximum
+likelihood (or targeted minimum loss-based) estimation of these causal effect
+parameters through a unified interface. For a general discussion of the
+framework of targeted minimum loss-based estimation and its relationship to
+statistical causal inference, the motivated reader may consider consulting
+@vdl2011targeted and @vdl2018targeted. A practical and accessible introduction
+using the `tlverse` software ecosystem is provided in @vdl2021targeted (see
+https://tlverse.org/tlverse-handbook).
 
 ---
 
