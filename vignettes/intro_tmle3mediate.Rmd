@@ -33,13 +33,15 @@ library(tidyr)
 library(sl3)
 library(tmle3)
 library(tmle3mediate)
-library(mma)
-set.seed(429153)
 
 # load and examine data
+library(mma)
 data(weight_behavior)
 dim(weight_behavior)
 head(weight_behavior)
+
+# set a seed
+set.seed(429153)
 ```
 
 The documentation for the dataset describes it as a "database obtained from the

@@ -10,18 +10,19 @@ language: r
 sudo: required
 cache: packages
 warnings_are_errors: true
+
+cran: http://cran.rstudio.com
 r_build_args: "--no-manual"
 r_check_args: "--no-build-vignettes --no-manual"
+
+r:
+  - release
+  - devel
 
 addons:
   apt:
     packages:
       - libgit2-dev
-
-r:
-  - oldrel
-  - release
-  - devel
 
 r_packages:
   - devtools
