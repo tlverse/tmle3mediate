@@ -29,6 +29,7 @@ r_packages:
   - covr
   - sessioninfo
   - data.table
+  - mma
 
 r_github_packages:
   - tlverse/sl3
