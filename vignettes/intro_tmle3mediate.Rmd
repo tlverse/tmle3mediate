@@ -560,9 +560,9 @@ tmle_spec_pie_decomp <- tmle_medshift(
 
 # compute the TML estimate
 weight_behavior_pie_decomp <- tmle3(
-  tmle_spec_medshift, weight_behavior_complete, node_list, learner_list
+  tmle_spec_pie_decomp, weight_behavior_complete, node_list, learner_list
 )
-weight_behavior_medshift
+weight_behavior_pie_decomp
 ```
 
 ## Estimating the Population Intervention Direct Effect
