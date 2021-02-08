@@ -353,9 +353,9 @@ and $Y$.
 
 ```{r NIE, message=FALSE, warning=FALSE}
 tmle_spec_NIE <- tmle_NIE(
-  e_learners = Lrnr_cv$new(hal_binary_learner, full_fit = TRUE),
-  psi_Z_learners = Lrnr_cv$new(hal_contin_learner, full_fit = TRUE),
-  max_iter = 5
+  e_learners = Lrnr_cv$new(lasso_binary_learner, full_fit = TRUE),
+  psi_Z_learners = Lrnr_cv$new(lasso_contin_learner, full_fit = TRUE),
+  max_iter = 1
 )
 weight_behavior_NIE <- tmle3(
   tmle_spec_NIE, weight_behavior_complete, node_list, learner_list
@@ -375,14 +375,13 @@ the NIE with `tmle_spec_NDE` to define learners for the NDE nuisance parameters:
 
 ```{r NDE, message=FALSE, warning=FALSE}
 tmle_spec_NDE <- tmle_NDE(
-  e_learners = Lrnr_cv$new(hal_binary_learner, full_fit = TRUE),
-  psi_Z_learners = Lrnr_cv$new(hal_contin_learner, full_fit = TRUE),
-  max_iter = 5
+  e_learners = Lrnr_cv$new(lasso_binary_learner, full_fit = TRUE),
+  psi_Z_learners = Lrnr_cv$new(lasso_contin_learner, full_fit = TRUE),
+  max_iter = 1
 )
 weight_behavior_NDE <- tmle3(
   tmle_spec_NDE, weight_behavior_complete, node_list, learner_list
 )
-weight_behavior_NDE <- weight_behavior_NDE$summary
 weight_behavior_NDE
 ```
 
@@ -553,14 +552,14 @@ maximum likelihood_ estimator may also be formulated.  We demonstrate the use of
 
 ```{r efficient_est, message=FALSE, warning=FALSE}
 # instantiate tmle3 spec for stochastic mediation
-tmle_spec_medshift <- tmle_medshift(
+tmle_spec_pie_decomp <- tmle_medshift(
   delta = delta_ipsi,
-  e_learners = Lrnr_cv$new(hal_binary_learner, full_fit = TRUE),
-  phi_learners = Lrnr_cv$new(hal_contin_learner, full_fit = TRUE)
+  e_learners = Lrnr_cv$new(lasso_binary_learner, full_fit = TRUE),
+  phi_learners = Lrnr_cv$new(lasso_contin_learner, full_fit = TRUE)
 )
 
 # compute the TML estimate
-weight_behavior_medshift <- tmle3(
+weight_behavior_pie_decomp <- tmle3(
   tmle_spec_medshift, weight_behavior_complete, node_list, learner_list
 )
 weight_behavior_medshift
