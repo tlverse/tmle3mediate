@@ -418,7 +418,7 @@ data_sim <- sim_data(n_obs = 2000)
 head(data_sim)
 ```
 
-```{r fit_tmle3mediate_sim}
+```{r fit_tmle3mediate_sim, eval=FALSE}
 node_list <- list(
   W = c("W1", "W2", "W3"),
   A = "A",
