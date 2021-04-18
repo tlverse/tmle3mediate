@@ -112,6 +112,11 @@ tmle_spec <- tmle_medshift(delta = delta_ipsi,
                            max_iter = 5)
 tmle_out <- tmle3(tmle_spec, example_data, node_list, learner_list)
 tmle_out
+#> A tmle3_Fit that took 5 step(s)
+#>    type         param  init_est  tmle_est       se     lower   upper
+#> 1: PIDE E[Y_{A=NULL}] 0.7938906 0.7927072 0.203954 0.3929648 1.19245
+#>    psi_transformed lower_transformed upper_transformed
+#> 1:       0.7927072         0.3929648           1.19245
 ```
 
 -----

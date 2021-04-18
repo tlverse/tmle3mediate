@@ -68,7 +68,7 @@ To illustrate how `tmle3mediate` may be used to estimate the effect of applying
 a stochastic intervention to the treatment (`A`) while keeping the mediator(s)
 (`Z`) fixed, consider the following example:
 
-```{r simple_example, message=FALSE, warning=FALSE, eval=FALSE}
+```{r simple_example, message=FALSE, warning=FALSE}
 library(data.table)
 library(origami)
 library(sl3)
