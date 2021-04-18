@@ -150,7 +150,7 @@ After using the `tmle3mediate` R package, please cite the following:
       year  = {2021},
       doi = {},
       url = {https://github.com/tlverse/tmle3mediate},
-      note = {R package version 0.0.2}
+      note = {R package version 0.0.3}
     }
 ```
 
@@ -161,16 +161,16 @@ After using the `tmle3mediate` R package, please cite the following:
   - [R/`medshift`](https://github.com/nhejazi/medshift) - An R package
     providing tools to estimate the causal effect of stochastic
     treatment regimes in the mediation setting, including classical
-    (IPW) and doubly robust one-step estimators. This is an
-    implementation of the methodology explored by Dı́az and Hejazi
+    (G-computation, IPW) and doubly robust (one-step) estimators. This
+    is an implementation of the methodology explored by Dı́az and Hejazi
     (2020).
 
   - [R/`medoutcon`](https://github.com/nhejazi/medoutcon) - An R package
     providing doubly robust estimators (one-step, TMLE) of the
-    interventional (in)direct effects, which are defined by joint
-    static-stochastic interventions applied to the exposure and
-    mediators, respectively. These effect definitions are similar to but
-    more general than the natural (in)direct effects. This is an
+    interventional (in)direct effects, which are defined by joint static
+    and stochastic interventions applied to the exposure and mediators,
+    respectively. These effect definitions are similar to but more
+    general than the natural (in)direct effects. This is an
     implementation of the methodology explored by Dı́az et al. (2020).
 
 -----
