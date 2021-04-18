@@ -27,8 +27,7 @@ Imports:
     methods,
     data.table,
     assertthat,
-    tmle3,
-    sl3
+    tmle3 (>= 0.2.0)
 Suggests:
     testthat,
     knitr,
@@ -40,10 +39,10 @@ Suggests:
     dplyr,
     Rsolnp,
     nnls,
-    hal9001,
-    medshift,
     speedglm,
-    here
+    sl3 (>= 1.4.2),
+    hal9001,
+    medshift
 Remotes:
     github::tlverse/sl3,
     github::tlverse/tmle3,

@@ -26,9 +26,12 @@ addons:
 
 r_packages:
   - devtools
-  - covr
   - sessioninfo
+  - covr
   - data.table
+  - delayed
+  - origami
+  - hal9001
   - mma
 
 r_github_packages:
