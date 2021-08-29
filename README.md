@@ -3,12 +3,9 @@
 
 # R/`tmle3mediate`
 
-[![Travis-CI Build
-Status](https://travis-ci.com/tlverse/tmle3mediate.svg?branch=master)](https://travis-ci.com/tlverse/tmle3mediate)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/tlverse/tmle3mediate?branch=master&svg=true)](https://ci.appveyor.com/project/tlverse/tmle3mediate)
+[![R-CMD-check](https://github.com/tlverse/tmle3mediate/workflows/R-CMD-check/badge.svg)](https://github.com/tlverse/tmle3mediate/actions)
 [![Coverage
-Status](https://img.shields.io/codecov/c/github/tlverse/tmle3mediate/master.svg)](https://codecov.io/github/tlverse/tmle3mediate?branch=master)
+Status](https://codecov.io/gh/tlverse/tmle3mediate/branch/master/graph/badge.svg)](https://codecov.io/gh/tlverse/tmle3mediate)
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
