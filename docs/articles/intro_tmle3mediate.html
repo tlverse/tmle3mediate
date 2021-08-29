@@ -62,7 +62,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/tlverse/tmle3mediate">
-    <span class="fas fa-github fa-lg"></span>
+    <span class="fa fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -84,7 +84,7 @@
 <a href="https://nimahejazi.org">Nima Hejazi</a>, <a href="https://statistics.berkeley.edu/people/james-duncan">James Duncan</a>, and <a href="http://bbd.berkeley.edu/cohort-4-2019-2020.html">David McCoy</a>
 </h4>
             
-            <h4 class="date">2021-04-18</h4>
+            <h4 class="date">2021-08-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/tlverse/tmle3mediate/blob/master/vignettes/intro_tmle3mediate.Rmd"><code>vignettes/intro_tmle3mediate.Rmd</code></a></small>
       <div class="hidden name"><code>intro_tmle3mediate.Rmd</code></div>
@@ -115,7 +115,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">429153</span><span class="op">)</span></code></pre></div>
 <p>The documentation for the dataset describes it as a “database obtained from the Louisiana State University Health Sciences Center, New Orleans, by Dr. Richard Scribner. He explored the relationship between BMI and kids’ behavior through a survey at children, teachers and parents in Grenada in 2014. This data set includes 691 observations and 15 variables.”</p>
 <p>Unfortunately, the dataset contains a few observations with missing values. As these are unrelated to the demonstration of our analytic methodology, we’ll simply remove these for the time being. Note that in a real-world data analysis, we would instead consider strategies for working with the observed data and missing observations, including imputation and inverse probability of censoring weighting. For now, we simply remove the incomplete observations, resulting in a dataset with fewer observations but much the same structure as the original:</p>
-<pre><code>## # A tibble: 567 x 15
+<pre><code>## # A tibble: 567 × 15
 ##      bmi   age sex   race  numpeople   car gotosch snack tvhours cmpthours
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;     &lt;int&gt; &lt;int&gt; &lt;fct&gt;   &lt;fct&gt;   &lt;dbl&gt;     &lt;dbl&gt;
 ##  1  18.2  12.2 F     OTHER         5     3 2       1           4         0
@@ -307,10 +307,10 @@ loosely, meaning estimating using flexible machine learning algorithms.
 <span class="op">)</span>
 <span class="va">weight_behavior_NIE</span></code></pre></div>
 <pre><code>## A tmle3_Fit that took 1 step(s)
-##    type                  param init_est tmle_est        se      lower    upper
-## 1:  NIE NIE[Y_{A=1} - Y_{A=0}] 1.006857 1.009772 0.5130378 0.00423685 2.015308
-##    psi_transformed lower_transformed upper_transformed
-## 1:        1.009772        0.00423685          2.015308</code></pre>
+##    type                  param init_est  tmle_est        se       lower
+## 1:  NIE NIE[Y_{A=1} - Y_{A=0}] 1.020857 0.9976898 0.5242565 -0.02983395
+##       upper psi_transformed lower_transformed upper_transformed
+## 1: 2.025214       0.9976898       -0.02983395          2.025214</code></pre>
 </div>
 <div id="estimating-the-natural-direct-effect" class="section level2">
 <h2 class="hasAnchor">
@@ -327,10 +327,10 @@ loosely, meaning estimating using flexible machine learning algorithms.
 <span class="op">)</span>
 <span class="va">weight_behavior_NDE</span></code></pre></div>
 <pre><code>## A tmle3_Fit that took 1 step(s)
-##    type                  param   init_est   tmle_est        se     lower
-## 1:  NDE NDE[Y_{A=1} - Y_{A=0}] 0.01828094 0.01828094 0.6911789 -1.336405
-##       upper psi_transformed lower_transformed upper_transformed
-## 1: 1.372967      0.01828094         -1.336405          1.372967</code></pre>
+##    type                  param init_est tmle_est        se     lower    upper
+## 1:  NDE NDE[Y_{A=1} - Y_{A=0}] 0.026284 0.026284 0.7494207 -1.442554 1.495122
+##    psi_transformed lower_transformed upper_transformed
+## 1:        0.026284         -1.442554          1.495122</code></pre>
 <!--
 Let's check out what MMA looks like for this sports behavior -> BMI dataset as
 mediated by these same three covariates:
@@ -462,11 +462,11 @@ print(mma_glm)
   <span class="va">tmle_spec_pie_decomp</span>, <span class="va">weight_behavior_complete</span>, <span class="va">node_list</span>, <span class="va">learner_list</span>
 <span class="op">)</span>
 <span class="va">weight_behavior_pie_decomp</span></code></pre></div>
-<pre><code>## A tmle3_Fit that took 1672 step(s)
+<pre><code>## A tmle3_Fit that took 2144 step(s)
 ##    type         param init_est tmle_est        se    lower    upper
-## 1: PIDE E[Y_{A=NULL}] 19.15858 19.14498 0.1872736 18.77793 19.51203
+## 1: PIDE E[Y_{A=NULL}] 19.16216 19.14584 0.1881337 18.77711 19.51458
 ##    psi_transformed lower_transformed upper_transformed
-## 1:        19.14498          18.77793          19.51203</code></pre>
+## 1:        19.14584          18.77711          19.51458</code></pre>
 </div>
 <div id="estimating-the-population-intervention-direct-effect" class="section level2">
 <h2 class="hasAnchor">
