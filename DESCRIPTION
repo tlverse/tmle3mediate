@@ -46,7 +46,7 @@ Suggests:
     medshift,
     mma
 Remotes:
-    github::tlverse/sl3,
+    github::tlverse/sl3@devel,
     github::tlverse/tmle3,
     github::nhejazi/medshift
 License: GPL-3
